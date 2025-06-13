@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: parent(~{::#content})}">
+<section id="content" class="w-full flex flex-col items-center gap-6">
+    <h2 class="text-xl font-bold text-center">Upload Air Flow Rate and Gas/Dust Emission Rate</h2>
+
+    <form th:action="@{/process}" method="post" enctype="multipart/form-data" class="space-y-4 w-full max-w-md">
+        
+        <!-- Excel File Upload -->
+        <div>
+            <label class="block mb-1 font-semibold">Air Flow Quantity at Leakages</label>
+            <input type="file" name="file" accept=".xls,.xlsx" required 
+                   class="w-full border border-gray-300 p-2 rounded">
+        </div>
+
+        <!-- Emission Rate -->
+        <div>
+            <label class="block mb-1 font-semibold">Dust/Gas Emission Rate (lit/sec)</label>
+            <input type="number" name="emissionRate" step="0.01" inputmode="decimal" required 
+                   class="w-full border border-gray-300 p-2 rounded" placeholder="e.g. 12.34">
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">
+            Find Concentration Distribution
+        </button>
+    </form>
+</section>
+</html>

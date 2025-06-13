@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" th:fragment="parent(content)">
+<!-- This is the base HTML template for the Washibility App. It includes a navbar, main content area, and footer. -->
+<head>
+    <meta charset="UTF-8">
+    <title>Concentration Analysis App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<!-- <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800"> -->
+<body class="flex flex-col min-h-screen bg-gray-100 text-gray-800 pt-[60px] pb-[48px]">
+
+
+    <!-- Navbar -->
+    <div data-th-replace="~{navbar :: navbar}"></div>
+
+    <!-- Main Container -->
+    <!-- <main class="flex-grow flex items-center justify-center p-4"> -->
+        <!-- <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6"> -->
+            <!-- <section data-th-replace="${content}"></section> -->
+            <!-- <div th:replace="~{::section}"> Section to be replaced in child templates -->
+                <!-- <p class="text-center text-gray-500">This is the main container area.</p> -->
+            <!-- </div> -->
+        <!-- </div> -->
+    <!-- </main> -->
+
+     <!-- Updated -->
+
+    <!-- <main class="flex-grow flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6 flex items-center justify-center">
+        <section data-th-replace="${content}"></section>
+    </div> -->
+    <!-- </main> -->
+
+    <!-- Updated  -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg border-t-4 border-blue-600 p-4 overflow-y-auto"
+             style="height: calc(100vh - 150px);"> <!--64px (navbar) + 64px (footer) -->
+            <section data-th-replace="${content}" class="flex flex-col items-center w-full gap-4"></section>
+        </div>
+    </main>
+
+
+
+
+    <!-- Footer -->
+    <div data-th-replace="~{footer :: footer}"></div>
+
+</body>
+</html>
