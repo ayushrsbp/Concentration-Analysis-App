@@ -14,12 +14,4 @@ public class PageController {
     public String home() {
         return "airquantitydata";
     }
-
-    @PostMapping("/process")
-    public String processInput(@RequestParam("file") MultipartFile file,
-                               @RequestParam("emissionRate") double emissionRate,
-                               Model model) {
-        
-        return "result-view";
-    }
 }

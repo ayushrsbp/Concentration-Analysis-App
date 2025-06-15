@@ -15,4 +15,5 @@ public class Result {
     private double concentrationAtFace;
     private double[] intakeFlowRate;
     private double[] returnFlowRate;
+    private int[] distance;
 }

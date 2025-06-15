@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: parent(~{::#content})}">
+<section id="content" class="w-full flex flex-col items-center gap-6">
+
+    <!-- Title -->
+    <h2 class="text-2xl font-bold text-center">Concentration Distribution Result</h2>
+
+    <!-- Concentration at Mine Face -->
+    <div class="text-lg font-semibold text-center text-gray-800">
+        Concentration at Mine Face:
+        <span data-th:text="${result.concentrationAtFace} + ' mg/m³'" class="text-blue-600"></span>
+    </div>
+
+    <!-- Data Table -->
+    <div class="overflow-x-auto w-full max-w-6xl">
+        <table class="w-full border border-collapse text-sm text-left">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border px-4 py-2">Distance (m)</th>
+                    <th class="border px-4 py-2">Intake Flow Rate (l/s)</th>
+                    <th class="border px-4 py-2">Return Flow Rate (l/s)</th>
+                    <th class="border px-4 py-2">Concentration in Duct (mg/m³)</th>
+                    <th class="border px-4 py-2">Concentration in Mine (mg/m³)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="i : ${#numbers.sequence(0, result.distance.length - 1)}">
+                    <td class="border px-4 py-2" th:text="${result.distance[i]}"></td>
+                    <td class="border px-4 py-2" th:text="${result.intakeFlowRate[i]}"></td>
+                    <td class="border px-4 py-2" th:text="${result.returnFlowRate[i]}"></td>
+                    <td class="border px-4 py-2" th:text="${result.concInDuct[i]}"></td>
+                    <td class="border px-4 py-2" th:text="${result.concInMine[i]}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Chart: Concentration vs Distance -->
+    <div class="w-full max-w-4xl">
+        <h3 class="text-lg font-semibold mb-2 text-center">Concentration in Duct and Mine vs Distance</h3>
+        <canvas id="concentrationChart" class="w-full h-64"></canvas>
+    </div>
+
+    <!-- Chart: Flow Rate vs Distance -->
+    <div class="w-full max-w-4xl">
+        <h3 class="text-lg font-semibold mb-2 text-center">Intake & Return Flow Rate vs Distance</h3>
+        <canvas id="flowRateChart" class="w-full h-64"></canvas>
+    </div>
+
+    <!-- Chart.js Script -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const distance = /*[[${result.distance}]]*/[];
+        const concInDuct = /*[[${result.concInDuct}]]*/[];
+        const concInMine = /*[[${result.concInMine}]]*/[];
+        const intakeFlowRate = /*[[${result.intakeFlowRate}]]*/[];
+        const returnFlowRate = /*[[${result.returnFlowRate}]]*/[];
+
+        // Chart 1: Concentration
+        new Chart(document.getElementById('concentrationChart'), {
+            type: 'line',
+            data: {
+                labels: distance,
+                datasets: [
+                    {
+                        label: 'Concentration in Duct',
+                        data: concInDuct,
+                        borderColor: 'rgb(59, 130, 246)',
+                        fill: false
+                    },
+                    {
+                        label: 'Concentration in Mine',
+                        data: concInMine,
+                        borderColor: 'rgb(34, 197, 94)',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Distance (m)' } },
+                    y: { title: { display: true, text: 'Concentration (mg/m³)' } }
+                }
+            }
+        });
+
+        // Chart 2: Flow Rate
+        new Chart(document.getElementById('flowRateChart'), {
+            type: 'line',
+            data: {
+                labels: distance,
+                datasets: [
+                    {
+                        label: 'Intake Flow Rate',
+                        data: intakeFlowRate,
+                        borderColor: 'rgb(250, 204, 21)',
+                        fill: false
+                    },
+                    {
+                        label: 'Return Flow Rate',
+                        data: returnFlowRate,
+                        borderColor: 'rgb(239, 68, 68)',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Distance (m)' } },
+                    y: { title: { display: true, text: 'Flow Rate (l/s)' } }
+                }
+            }
+        });
+        /*]]>*/
+    </script>
+
+</section>
+</html>

@@ -15,9 +15,6 @@ public class ExcelService {
 
     public double[] processExcel(MultipartFile file) throws IOException {
         List<Double> flowRate = new ArrayList<>();
-        List<Double> sg = new ArrayList<>();
-        List<Double> wt = new ArrayList<>();
-        List<Double> ash = new ArrayList<>();
 
         try (InputStream is = file.getInputStream()) {
             Workbook workbook = new XSSFWorkbook(is);
@@ -30,7 +27,7 @@ public class ExcelService {
             }
         }
         // Error handling
-        int n = wt.size();
+        int n = flowRate.size();
         double[] data = new double[n];
         for (int i = 0; i < n; i++) {
             data[i] = flowRate.get(i);

@@ -12,4 +12,5 @@ public class InputData {
     private double enterAirFlowRate;
     private MultipartFile file;
     private double emissionRate;
+    private int segmentLength;
 }
