@@ -22,8 +22,8 @@ public class ExcelService {
             int rowCount = sheet.getPhysicalNumberOfRows();
             for (int i = 2; i < rowCount; i++) { 
                 Row row = sheet.getRow(i);
-                if(row.getCell(0).getCellType() == CellType.BLANK) break;
-                flowRate.add(row.getCell(0).getNumericCellValue());
+                if(row.getCell(1).getCellType() == CellType.BLANK) break;
+                flowRate.add(row.getCell(1).getNumericCellValue());
             }
         }
         // Error handling

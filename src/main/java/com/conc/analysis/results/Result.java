@@ -13,6 +13,7 @@ public class Result {
     private double[] concInDuct;
     private double[] concInMine;
     private double concentrationAtFace;
+    private double[] leakages;
     private double[] intakeFlowRate;
     private double[] returnFlowRate;
     private int[] distance;

@@ -1,13 +1,13 @@
 package com.conc.analysis.service;
 
-import com.conc.analysis.form.InputData;
-import com.conc.analysis.results.Result;
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import com.conc.analysis.service.ExcelService;
+import com.conc.analysis.form.InputData;
+import com.conc.analysis.results.Result;
 
 @Service
 public class Analysis {
@@ -39,45 +39,49 @@ public class Analysis {
         returnFlowRate[0] = entryFlowRate;
 
         double prevQinDuct = entryFlowRate, prevQinMine = entryFlowRate;
-        double prevConcInDuct = 0.0, prevConcInMine = emissionRate/entryFlowRate;
+        double prevConcInDuct = 0.0, prevConcInMine = Math.round(emissionRate/entryFlowRate * 1000)/1000.0;
 
         concentrationInDuct[0] = prevConcInDuct;
         concentrationInMine[0] = prevConcInMine;
+        concentrationInMine[1]  = prevConcInMine;
 
         for(int i = 1; i <= n; i++) {
-            if(leakageFlowRate[i-1] < 0.0) {
+            if(leakageFlowRate[i-1] > 0.0) {
                 concentrationInDuct[i] = prevConcInDuct;
-                concentrationInMine[i] = (prevConcInMine * prevQinMine + concentrationInDuct[i] * leakageFlowRate[i-1]) / (prevQinMine + leakageFlowRate[i-1]);
+                double currConcInMine = (prevConcInMine * prevQinMine - concentrationInDuct[i] * leakageFlowRate[i-1]) / (prevQinMine - leakageFlowRate[i-1]);
+                concentrationInMine[i+1] = Math.round(currConcInMine * 1000) / 1000.0;
             }
             else {
-                concentrationInMine[i] = prevConcInMine;
-                concentrationInDuct[i] = (prevConcInDuct * prevQinDuct - concentrationInMine[i] * leakageFlowRate[i-1]) / (prevQinDuct - leakageFlowRate[i-1]);
+                concentrationInMine[i+1] = prevConcInMine;
+                double currConcInDuct = (prevConcInDuct * prevQinDuct - concentrationInMine[i+1] * leakageFlowRate[i-1]) / (prevQinDuct - leakageFlowRate[i-1]);
+                concentrationInDuct[i] = Math.round(currConcInDuct * 1000) / 1000.0;
             }
             prevConcInDuct = concentrationInDuct[i];
-            prevConcInMine = concentrationInMine[i];
+            prevConcInMine = concentrationInMine[i+1];
 
             prevQinDuct -= leakageFlowRate[i-1];
-            prevQinMine += leakageFlowRate[i-1];
+            intakeFlowRate[i] = Math.round(prevQinDuct * 1000) / 1000.0;
+            
+            returnFlowRate[i] =  Math.round(prevQinMine * 1000) / 1000.0;
+            prevQinMine -= leakageFlowRate[i-1];
 
-            intakeFlowRate[i] = prevQinDuct;
-            returnFlowRate[i] = prevQinMine;
 
             distance[i] = i * segmentLength;
         }
 
-        double concAtFace = prevConcInDuct + (emissionRate / entryFlowRate);
+        double concAtFace = concentrationInMine[n+1];
 
-        concentrationInDuct[n+1] = concAtFace;
-        concentrationInMine[n+1] = concAtFace;
+        concentrationInDuct[n+1] = Math.round(concAtFace * 1000) / 1000.0;
 
-        intakeFlowRate[n+1] = prevQinDuct;
-        returnFlowRate[n+1] = prevQinMine;
+        intakeFlowRate[n+1] = Math.round(prevQinDuct * 1000) / 1000.0;
+        returnFlowRate[n+1] = Math.round(prevQinMine * 1000) / 1000.0;
 
         distance[n+1] = (n+1) * segmentLength;
 
         result.setConcInDuct(concentrationInDuct);
         result.setConcInMine(concentrationInMine);
         result.setConcentrationAtFace(concAtFace);
+        result.setLeakages(leakageFlowRate);
         result.setIntakeFlowRate(intakeFlowRate);
         result.setReturnFlowRate(returnFlowRate);
         result.setDistance(distance);
