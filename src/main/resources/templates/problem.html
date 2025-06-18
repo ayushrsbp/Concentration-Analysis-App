@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: parent(~{::#content})}">
+<section id="content" class="w-full flex flex-col items-center gap-6">
+
+    <h2 class="text-2xl font-bold mt-4">Enter Simulation Parameters</h2>
+
+    <form th:action="@{/compute}" method="post" class="w-full max-w-lg space-y-4">
+        <div>
+            <label for="nff" class="block font-medium">nff:</label>
+            <input type="number" name="nff" id="nff" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="nfb" class="block font-medium">nfb:</label>
+            <input type="number" name="nfb" id="nfb" class="w-full border p-2 rounded" onchange="generateFanInputs()" required>
+        </div>
+
+        <div>
+            <label for="iter" class="block font-medium">iter:</label>
+            <input type="number" name="iter" id="iter" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="err" class="block font-medium">err:</label>
+            <input type="number" step="any" name="err" id="err" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="noOfDuctSegments" class="block font-medium">noOfDuctSegments:</label>
+            <input type="number" name="noOfDuctSegments" id="noOfDuctSegments" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="a" class="block font-medium">a:</label>
+            <input type="number" step="any" name="a" id="a" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="b" class="block font-medium">b:</label>
+            <input type="number" step="any" name="b" id="b" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="ductSegmentResistance" class="block font-medium">ductSegmentResistance:</label>
+            <input type="number" step="any" name="ductSegmentResistance" id="ductSegmentResistance" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="leakageResistance" class="block font-medium">leakageResistance:</label>
+            <input type="number" step="any" name="leakageResistance" id="leakageResistance" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div id="fanPosContainer" class="space-y-2"></div>
+
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit</button>
+    </form>
+
+    <script>
+        function generateFanInputs() {
+            let count = parseInt(document.getElementById("nfb").value) || 0;
+            let container = document.getElementById("fanPosContainer");
+            container.innerHTML = "";
+
+            for (let i = 0; i < count; i++) {
+                let div = document.createElement("div");
+                div.className = "flex flex-col";
+
+                let label = document.createElement("label");
+                label.className = "font-medium";
+                label.innerText = "Fan Position " + (i + 1) + ":";
+
+                let input = document.createElement("input");
+                input.type = "number";
+                input.name = "fanPos[" + i + "]";
+                input.className = "border p-2 rounded";
+                input.required = true;
+
+                div.appendChild(label);
+                div.appendChild(input);
+                container.appendChild(div);
+            }
+        }
+    </script>
+
+</section>
+</html>

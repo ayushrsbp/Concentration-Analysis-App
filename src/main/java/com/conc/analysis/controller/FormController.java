@@ -9,12 +9,17 @@ import java.io.IOException;
 import com.conc.analysis.form.InputData;
 import com.conc.analysis.results.Result;
 import com.conc.analysis.service.Analysis;
+import com.conc.analysis.service.Analysis2;
+import com.conc.analysis.form.InputData2;
 
 @Controller
 public class FormController {
 
     @Autowired
     private Analysis analysis;
+
+    @Autowired
+    private Analysis2 analysis2;
 
     @PostMapping("/process")
     public String processInput(@ModelAttribute InputData inputData,
@@ -24,4 +29,11 @@ public class FormController {
         return "result";
     }
 
+    @PostMapping("/compute")
+    public String find(@ModelAttribute InputData2 inputData,
+                       Model model) throws IOException {
+        analysis2.analyze(inputData);
+        // model.addAttribute("result", result);
+        return "result";
+    }
 }
