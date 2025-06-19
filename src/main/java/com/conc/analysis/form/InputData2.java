@@ -18,4 +18,6 @@ public class InputData2 {
     private double a, b;
     private double ductSegmentResistance, leakageResistance;
     private int[] fanPos;
+    private double emissionRate;
+    private int segmentLength;
 }

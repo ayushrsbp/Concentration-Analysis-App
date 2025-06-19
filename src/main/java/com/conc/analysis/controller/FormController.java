@@ -32,8 +32,8 @@ public class FormController {
     @PostMapping("/compute")
     public String find(@ModelAttribute InputData2 inputData,
                        Model model) throws IOException {
-        analysis2.analyze(inputData);
-        // model.addAttribute("result", result);
+        Result result = analysis2.analyze(inputData);
+        model.addAttribute("result", result);
         return "result";
     }
 }

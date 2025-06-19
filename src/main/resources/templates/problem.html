@@ -5,79 +5,126 @@
     <h2 class="text-2xl font-bold mt-4">Enter Simulation Parameters</h2>
 
     <form th:action="@{/compute}" method="post" class="w-full max-w-lg space-y-4">
+
+        <!-- Standard Inputs -->
         <div>
-            <label for="nff" class="block font-medium">nff:</label>
+            <label for="nff" class="block font-medium">No. of Fixed Flow Branches:</label>
             <input type="number" name="nff" id="nff" class="w-full border p-2 rounded" required>
         </div>
 
         <div>
-            <label for="nfb" class="block font-medium">nfb:</label>
+            <label for="nfb" class="block font-medium">No. of Fan Branches:</label>
             <input type="number" name="nfb" id="nfb" class="w-full border p-2 rounded" onchange="generateFanInputs()" required>
         </div>
 
         <div>
-            <label for="iter" class="block font-medium">iter:</label>
+            <label for="iter" class="block font-medium">No. of Iteration:</label>
             <input type="number" name="iter" id="iter" class="w-full border p-2 rounded" required>
         </div>
 
         <div>
-            <label for="err" class="block font-medium">err:</label>
+            <label for="err" class="block font-medium">Error Tolerance:</label>
             <input type="number" step="any" name="err" id="err" class="w-full border p-2 rounded" required>
         </div>
 
         <div>
-            <label for="noOfDuctSegments" class="block font-medium">noOfDuctSegments:</label>
+            <label for="noOfDuctSegments" class="block font-medium">No. of Duct Segments:</label>
             <input type="number" name="noOfDuctSegments" id="noOfDuctSegments" class="w-full border p-2 rounded" required>
         </div>
 
+        <!-- Emission Rate -->
         <div>
-            <label for="a" class="block font-medium">a:</label>
+            <label for="emissionRate" class="block font-medium">Emission Rate (lit/sec):</label>
+            <input type="number" step="any" name="emissionRate" id="emissionRate" class="w-full border p-2 rounded" required>
+        </div>
+
+        <!-- Segment Length -->
+        <div>
+            <label for="segmentLength" class="block font-medium">Duct Segment Length (m):</label>
+            <input type="number" name="segmentLength" id="segmentLength" class="w-full border p-2 rounded" required>
+        </div>
+
+        <!-- Fan Characteristics -->
+        <div class="font-semibold">Fan characteristics of the form P = AQ² + B</div>
+
+        <div>
+            <label for="a" class="block font-medium">Enter the value of A:</label>
             <input type="number" step="any" name="a" id="a" class="w-full border p-2 rounded" required>
         </div>
 
         <div>
-            <label for="b" class="block font-medium">b:</label>
+            <label for="b" class="block font-medium">Enter the value of B:</label>
             <input type="number" step="any" name="b" id="b" class="w-full border p-2 rounded" required>
         </div>
 
         <div>
-            <label for="ductSegmentResistance" class="block font-medium">ductSegmentResistance:</label>
+            <label for="ductSegmentResistance" class="block font-medium">Resistance of Each Duct Segment (Ns²/m⁸):</label>
             <input type="number" step="any" name="ductSegmentResistance" id="ductSegmentResistance" class="w-full border p-2 rounded" required>
         </div>
 
         <div>
-            <label for="leakageResistance" class="block font-medium">leakageResistance:</label>
+            <label for="leakageResistance" class="block font-medium">Assumed Resistance of Leakage (Ns²/m⁸):</label>
             <input type="number" step="any" name="leakageResistance" id="leakageResistance" class="w-full border p-2 rounded" required>
         </div>
 
-        <div id="fanPosContainer" class="space-y-2"></div>
+        <!-- Fan Positions Table -->
+        <div id="fanPosContainer" class="space-y-2">
+            <!-- dynamically inserted table -->
+        </div>
 
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit</button>
+        <!-- Submit Button Centered -->
+        <div class="flex justify-center">
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                Analyze Concentration
+            </button>
+        </div>
     </form>
 
+    <!-- Fan Position Table Script -->
     <script>
         function generateFanInputs() {
             let count = parseInt(document.getElementById("nfb").value) || 0;
             let container = document.getElementById("fanPosContainer");
             container.innerHTML = "";
 
-            for (let i = 0; i < count; i++) {
-                let div = document.createElement("div");
-                div.className = "flex flex-col";
+            if (count > 0) {
+                let table = document.createElement("table");
+                table.className = "w-full border border-collapse";
 
-                let label = document.createElement("label");
-                label.className = "font-medium";
-                label.innerText = "Fan Position " + (i + 1) + ":";
+                let thead = document.createElement("thead");
+                thead.innerHTML = `
+                    <tr class="bg-gray-200">
+                        <th class="border px-4 py-2 text-left">S.No.</th>
+                        <th class="border px-4 py-2 text-left">Fan Position</th>
+                    </tr>`;
+                table.appendChild(thead);
 
-                let input = document.createElement("input");
-                input.type = "number";
-                input.name = "fanPos[" + i + "]";
-                input.className = "border p-2 rounded";
-                input.required = true;
+                let tbody = document.createElement("tbody");
 
-                div.appendChild(label);
-                div.appendChild(input);
-                container.appendChild(div);
+                for (let i = 0; i < count; i++) {
+                    let tr = document.createElement("tr");
+
+                    let tdIndex = document.createElement("td");
+                    tdIndex.className = "border px-4 py-2";
+                    tdIndex.innerText = (i + 1);
+
+                    let tdInput = document.createElement("td");
+                    tdInput.className = "border px-4 py-2";
+
+                    let input = document.createElement("input");
+                    input.type = "number";
+                    input.name = `fanPos[${i}]`;
+                    input.className = "w-full border p-2 rounded";
+                    input.required = true;
+
+                    tdInput.appendChild(input);
+                    tr.appendChild(tdIndex);
+                    tr.appendChild(tdInput);
+                    tbody.appendChild(tr);
+                }
+
+                table.appendChild(tbody);
+                container.appendChild(table);
             }
         }
     </script>

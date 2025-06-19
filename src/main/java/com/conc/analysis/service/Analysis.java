@@ -19,13 +19,13 @@ public class Analysis {
 
     public Result analyzeConcentration(InputData inputData) throws IOException {
         // Process the input data
-        MultipartFile file = inputData.getFile();
+        // MultipartFile file = inputData.getFile();
         Double entryFlowRate = inputData.getEnterAirFlowRate();
         Double emissionRate = inputData.getEmissionRate();
         int segmentLength = inputData.getSegmentLength();
 
-        double[] leakageFlowRate = excelService.processExcel(file);
-
+        // double[] leakageFlowRate = excelService.processExcel(file);
+        double[] leakageFlowRate = inputData.getLeakageFlowRate();
         int n = leakageFlowRate.length;
         double[] concentrationInDuct = new double[n+2];
         double[] concentrationInMine = new double[n+2];
