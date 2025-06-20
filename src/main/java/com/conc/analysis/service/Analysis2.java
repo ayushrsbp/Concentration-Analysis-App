@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.conc.analysis.form.InputData;
 import com.conc.analysis.form.InputData2;
-import com.conc.analysis.service.Analysis;
 import com.conc.analysis.results.Result;
 
 
@@ -39,6 +38,14 @@ public class Analysis2 {
         pb.redirectErrorStream(true);
         Process process = pb.start();
         System.out.println("Running net.exe...");
+
+        // ⏳ Wait for 2 seconds
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Thread was interrupted while waiting for net.exe to finish.", e);
+        }
 
         // Read output file
         InputData inputdata2 = readOutputFile.read();
