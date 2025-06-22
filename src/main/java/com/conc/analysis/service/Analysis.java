@@ -11,7 +11,8 @@ import com.conc.analysis.results.Result;
 @Service
 public class Analysis {
 
-    private Result result = new Result();
+    @Autowired
+    private Result result;
 
     @Autowired
     private ExcelService excelService;
@@ -19,6 +20,7 @@ public class Analysis {
     public Result analyzeConcentration(InputData inputData) throws IOException {
         // Process the input data
         // MultipartFile file = inputData.getFile();
+        result.setValid(true);
         Double entryFlowRate = inputData.getEnterAirFlowRate();
         Double emissionRate = inputData.getEmissionRate();
         int segmentLength = inputData.getSegmentLength();
@@ -67,7 +69,10 @@ public class Analysis {
 
             distance[i] = i * segmentLength;
         }
-
+        if(prevQinDuct <= 0.0) {
+            System.out.println("method called");
+            result.setValid(false);
+        }
         double concAtFace = concentrationInMine[n+1];
 
         concentrationInDuct[n+1] = Math.round(concAtFace * 10000) / 10000.0;
@@ -84,6 +89,8 @@ public class Analysis {
         result.setIntakeFlowRate(intakeFlowRate);
         result.setReturnFlowRate(returnFlowRate);
         result.setDistance(distance);
+        result.setEnterAirFlowRate(entryFlowRate);
+        result.setEmissionRate(emissionRate);
 
         return result;
     }

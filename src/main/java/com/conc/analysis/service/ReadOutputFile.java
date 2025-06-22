@@ -40,7 +40,7 @@ public class ReadOutputFile {
         }
 
         // Step 1: enterAirFlowRate = abs(value of 6th column of last row)
-        double enterAirFlowRate = 0.05+Math.abs(parsedRows.get(parsedRows.size() - 1)[5]);
+        double enterAirFlowRate = Math.abs(parsedRows.get(parsedRows.size() - 1)[5]);
 
         // Step 2: collect 6th column values from last-1 to row where 2nd column == 3
         List<Double> leakageList = new ArrayList<>();

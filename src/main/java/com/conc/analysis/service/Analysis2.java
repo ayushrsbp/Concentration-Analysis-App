@@ -53,6 +53,8 @@ public class Analysis2 {
         inputdata2.setSegmentLength(segmentLength);
 
         Result result = analysis.analyzeConcentration(inputdata2);
+        result.setFanCount(inputData.getNfb());
+        result.setDuctSegmentCount(inputData.getNoOfDuctSegments());
 
         return result;
     }

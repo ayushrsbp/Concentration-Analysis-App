@@ -1,49 +1,94 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en" th:fragment="parent(content)">
-<!-- This is the base HTML template for the Washibility App. It includes a navbar, main content area, and footer. -->
+<html xmlns:th="http://www.thymeleaf.org" lang="en" th:fragment="parent(content, leftContent, rightContent)">
 <head>
     <meta charset="UTF-8">
     <title>Concentration Analysis App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .transition-width {
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
 </head>
-<!-- <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800"> -->
+
 <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800 pt-[60px] pb-[48px]">
 
+<!-- Navbar -->
+<div data-th-replace="~{navbar :: navbar}"></div>
 
-    <!-- Navbar -->
-    <div data-th-replace="~{navbar :: navbar}"></div>
+<!-- Layout -->
+<div class="flex-grow flex flex-row w-full transition-all duration-300" id="layoutRow">
 
-    <!-- Main Container -->
-    <!-- <main class="flex-grow flex items-center justify-center p-4"> -->
-        <!-- <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6"> -->
-            <!-- <section data-th-replace="${content}"></section> -->
-            <!-- <div th:replace="~{::section}"> Section to be replaced in child templates -->
-                <!-- <p class="text-center text-gray-500">This is the main container area.</p> -->
-            <!-- </div> -->
-        <!-- </div> -->
-    <!-- </main> -->
+    <!-- LEFT SIDEBAR -->
+    <aside id="leftSidebar"
+           th:if="${leftContent != null}"
+           class="w-64 min-w-[16rem] transition-all duration-300 bg-white border-r shadow-md p-4 flex flex-col gap-4 rounded-lg m-2 "
+           style="max-height: calc(100vh - 140px); overflow-y: auto;">
+        <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-blue-600">Summary</h3>
+            <button onclick="toggleSidebar('leftSidebar', 'showLeftBtn')" class="mr-2 mt-4 text-sm text-blue-800 font-medium bg-gray-300 px-2 py-1 rounded">←</button>
+        </div>
+        <div data-th-replace="${leftContent}"></div>
+    </aside>
 
-     <!-- Updated -->
+    <!-- Show Left Sidebar Button -->
+    <div id="showLeftBtn" class="hidden flex items-center">
+        <button onclick="toggleSidebar('leftSidebar', 'showLeftBtn')"
+                class="ml-2 mt-4 text-sm text-blue-800 font-medium bg-gray-300 px-2 py-1 rounded">
+                →
+        </button>
+    </div>
 
-    <!-- <main class="flex-grow flex items-center justify-center p-4">
-    <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6 flex items-center justify-center">
-        <section data-th-replace="${content}"></section>
-    </div> -->
-    <!-- </main> -->
-
-    <!-- Updated  -->
-    <main class="flex-grow flex items-center justify-center p-4">
+    <!-- MAIN CONTENT -->
+    <main id="mainContent" class="flex-grow flex items-center justify-center p-4 transition-all duration-300 w-full">
         <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg border-t-4 border-blue-600 p-4 overflow-y-auto"
-             style="height: calc(100vh - 150px);"> <!--64px (navbar) + 64px (footer) -->
+             style="height: calc(100vh - 150px);">
             <section data-th-replace="${content}" class="flex flex-col items-center w-full gap-4"></section>
         </div>
     </main>
 
+    <!-- Show Right Sidebar Button -->
+    <div id="showRightBtn" class="hidden flex items-center">
+        <button onclick="toggleSidebar('rightSidebar', 'showRightBtn')"
+                class="mr-2 mt-4 text-sm text-blue-800 font-medium bg-gray-300 px-2 py-1 rounded">
+                ←
+        </button>
+    </div>
 
+    <!-- RIGHT SIDEBAR -->
+    <aside id="rightSidebar"
+           th:if="${rightContent != null}"
+           class="w-72 min-w-[18rem] transition-all duration-300 bg-white border-l shadow-md p-4 flex flex-col gap-4 rounded-lg m-2"
+           style="max-height: calc(100vh - 140px); overflow-y: auto;">
+        <div class="flex justify-between items-center">
+            <button onclick="toggleSidebar('rightSidebar', 'showRightBtn')" class="mr-2 mt-4 text-sm text-blue-800 font-medium bg-gray-300 px-2 py-1 rounded">→</button>
+            <h3 class="text-lg font-semibold text-blue-600">Actions</h3>
+        </div>
+        <div data-th-replace="${rightContent}"></div>
+    </aside>
+</div>
 
+<!-- FOOTER -->
+<div data-th-replace="~{footer :: footer}"></div>
 
-    <!-- Footer -->
-    <div data-th-replace="~{footer :: footer}"></div>
+<!-- TOGGLE LOGIC -->
+<script>
+    function toggleSidebar(sidebarId, showBtnId) {
+        const sidebar = document.getElementById(sidebarId);
+        const showBtn = document.getElementById(showBtnId);
+        const main = document.getElementById("mainContent");
+
+        if (!sidebar.classList.contains('hidden')) {
+            sidebar.classList.add('hidden');
+            showBtn.classList.remove('hidden');
+            main.classList.add('w-full');
+        } else {
+            sidebar.classList.remove('hidden');
+            showBtn.classList.add('hidden');
+            main.classList.remove('w-full');
+        }
+    }
+</script>
 
 </body>
 </html>

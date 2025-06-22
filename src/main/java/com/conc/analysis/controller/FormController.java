@@ -34,6 +34,6 @@ public class FormController {
                        Model model) throws IOException {
         Result result = analysis2.analyze(inputData);
         model.addAttribute("result", result);
-        return "result";
+        return "result21";
     }
 }

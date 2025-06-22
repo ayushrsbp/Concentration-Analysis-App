@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: parent(~{::#content})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent})}">
 <section id="content" class="w-full flex flex-col items-center gap-6">
 
     <h2 class="text-2xl font-bold mt-4">Enter Simulation Parameters</h2>
@@ -34,7 +34,7 @@
 
         <!-- Emission Rate -->
         <div>
-            <label for="emissionRate" class="block font-medium">Emission Rate (lit/sec):</label>
+            <label for="emissionRate" class="block font-medium">Emission Rate (mg/sec):</label>
             <input type="number" step="any" name="emissionRate" id="emissionRate" class="w-full border p-2 rounded" required>
         </div>
 
@@ -45,7 +45,7 @@
         </div>
 
         <!-- Fan Characteristics -->
-        <div class="font-semibold">Fan characteristics of the form P = AQ² + B</div>
+        <div class="font-blue-semibold">Fan characteristics of the form P = AQ² + B</div>
 
         <div>
             <label for="a" class="block font-medium">Enter the value of A:</label>

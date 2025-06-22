@@ -4,10 +4,12 @@ import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Scope;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Scope("prototype")
 @Component
 public class InputData2 {
     private int nff;

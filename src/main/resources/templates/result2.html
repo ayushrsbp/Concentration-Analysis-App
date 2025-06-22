@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: parent(~{::#content})}">
+
+<!-- TOGGLE BUTTONS -->
+<button onclick="togglePanel('leftPanel')" class="fixed left-0 top-4 bg-gray-300 px-2 py-1 rounded-r z-10">⬅</button>
+<button onclick="togglePanel('rightPanel')" class="fixed right-0 top-4 bg-gray-300 px-2 py-1 rounded-l z-10">➡</button>
+
+<!-- MAIN SECTION -->
+<section id="content" class="w-full flex flex-col items-center gap-6">
+
+    <!-- Error Message (Only if invalid) -->
+    <div th:if="${!result.isValid}" class="text-red-600 text-xl font-semibold text-center mt-10">
+        Given Configuration is not able to supply air to mine face.
+    </div>
+
+    <!-- Valid Result: Show Layout -->
+    <div class="flex w-full max-w-7xl gap-4" th:if="${result.isValid}">
+
+        <!-- LEFT PANEL -->
+        <aside id="leftPanel" class="w-1/4 bg-white shadow-lg rounded-lg border-t-4 border-blue-600 p-4 overflow-y-auto">
+            <button onclick="togglePanel('leftPanel')" class="absolute top-2 right-2 text-gray-500 font-bold">×</button>
+            <h3 class="text-lg font-semibold mb-4">Simulation Summary</h3>
+            <table class="w-full text-sm border border-gray-300">
+                <tbody>
+                    <tr><td class="border px-2 py-1 font-medium">Emission Rate</td><td class="border px-2 py-1" th:text="${emissionRate} + ' l/s'"></td></tr>
+                    <tr><td class="border px-2 py-1 font-medium">Mine Face Concentration</td><td class="border px-2 py-1" th:text="${result.concentrationAtFace} + ' mg/m³'"></td></tr>
+                    <tr><td class="border px-2 py-1 font-medium">No. of Fans</td><td class="border px-2 py-1" th:text="${fanCount}"></td></tr>
+                    <tr><td class="border px-2 py-1 font-medium">Enter Air Flow Rate</td><td class="border px-2 py-1" th:text="${enterAirFlowRate} + ' m³/s'"></td></tr>
+                    <tr><td class="border px-2 py-1 font-medium">Flow Rate at Face</td><td class="border px-2 py-1" th:text="${result.returnFlowRate[result.returnFlowRate.length - 1]} + ' m³/s'"></td></tr>
+                </tbody>
+            </table>
+        </aside>
+
+        <!-- CENTER / MAIN PANEL -->
+        <div class="flex-1 bg-white shadow-lg rounded-lg border-t-4 border-blue-600 p-4 overflow-y-auto">
+            <!-- Title -->
+            <h2 class="text-2xl font-bold text-center mb-4">Concentration Distribution Result</h2>
+
+            <!-- Mine Face Concentration -->
+            <div class="text-lg font-semibold text-center text-gray-800 mb-6">
+                Concentration at Mine Face:
+                <span th:text="${result.concentrationAtFace} + ' mg/m³'" class="text-green-600"></span>
+            </div>
+
+            <!-- Data Table -->
+            <div class="overflow-x-auto w-full">
+                <table id="resultTable" class="min-w-full border border-gray-300">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th rowspan="2" class="border px-4 py-2 bg-blue-200 text-center">Distance (m)</th>
+                            <th rowspan="2" class="border px-4 py-2 bg-blue-200 text-center">Leakages<br>(m³/s)</th>
+                            <th colspan="2" class="border px-4 py-2 bg-blue-200 text-center">Air Flow Rate (m³/s)</th>
+                            <th colspan="2" class="border px-4 py-2 bg-blue-200 text-center">Dust Concentration (mg/m³)</th>
+                        </tr>
+                        <tr>
+                            <th class="border px-4 py-2 bg-blue-200 text-center">In Duct</th>
+                            <th class="border px-4 py-2 bg-blue-200 text-center">In Mine</th>
+                            <th class="border px-4 py-2 bg-blue-200 text-center">In Duct</th>
+                            <th class="border px-4 py-2 bg-blue-200 text-center">In Mine</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="i : ${#numbers.sequence(0, result.distance.length - 1)}">
+                            <td class="border px-4 py-2 text-center" th:text="${result.distance[i]}"></td>
+                            <td class="border px-4 py-2 text-center" th:text="${i == 0 or i == result.distance.length - 1} ? '-' : ${result.leakages[i-1]}"></td>
+                            <td class="border px-4 py-2 text-center" th:text="${result.intakeFlowRate[i]}"></td>
+                            <td class="border px-4 py-2 text-center" th:text="${result.returnFlowRate[i]}"></td>
+                            <td class="border px-4 py-2 text-center" th:text="${i == result.distance.length - 1} ? '-' : ${result.concInDuct[i]}"></td>
+                            <td class="border px-4 py-2 text-center" th:text="${result.concInMine[i]}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Charts -->
+            <div id="concentrationChartSection" class="mt-8">
+                <h3 class="text-lg font-semibold text-center mb-2">Concentration in Duct and Mine vs Distance</h3>
+                <canvas id="concentrationChart" class="w-full h-64"></canvas>
+            </div>
+
+            <div id="flowRateChartSection" class="mt-8">
+                <h3 class="text-lg font-semibold text-center mb-2">Intake & Return Flow Rate vs Distance</h3>
+                <canvas id="flowRateChart" class="w-full h-64"></canvas>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <aside id="rightPanel" class="w-1/4 bg-white shadow-lg rounded-lg border-t-4 border-blue-600 p-4 overflow-y-auto space-y-4">
+            <button onclick="togglePanel('rightPanel')" class="absolute top-2 left-2 text-gray-500 font-bold">×</button>
+            <h3 class="text-lg font-semibold mb-2">Actions</h3>
+            <a href="#concentrationChartSection" class="text-blue-600 underline block">📈 Show Concentration Chart</a>
+            <a href="#flowRateChartSection" class="text-blue-600 underline block">🌬️ Show Flow Rate Chart</a>
+            <button onclick="downloadTable()" class="bg-blue-600 text-white px-3 py-1 rounded w-full">⬇ Download Table</button>
+            <button onclick="downloadChart('concentrationChart', 'concentration_chart.png')" class="bg-green-600 text-white px-3 py-1 rounded w-full">⬇ Download Concentration Chart</button>
+            <button onclick="downloadChart('flowRateChart', 'flowrate_chart.png')" class="bg-yellow-600 text-white px-3 py-1 rounded w-full">⬇ Download Flow Rate Chart</button>
+        </aside>
+    </div>
+</section>
+
+<!-- Chart.js + Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const distance = /*[[${result.distance}]]*/[];
+    const concInDuct = /*[[${result.concInDuct}]]*/[];
+    const concInMine = /*[[${result.concInMine}]]*/[];
+    const intakeFlowRate = /*[[${result.intakeFlowRate}]]*/[];
+    const returnFlowRate = /*[[${result.returnFlowRate}]]*/[];
+
+    const slicedDistance = distance.slice(0, distance.length - 1);
+    const slicedConcInDuct = concInDuct.slice(0, concInDuct.length - 1);
+
+    new Chart(document.getElementById('concentrationChart'), {
+        type: 'line',
+        data: {
+            labels: slicedDistance,
+            datasets: [
+                { label: 'Concentration in Duct', data: slicedConcInDuct, borderColor: 'rgb(59, 130, 246)', fill: false },
+                { label: 'Concentration in Mine', data: concInMine, borderColor: 'rgb(34, 197, 94)', fill: false }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Distance (m)' } },
+                y: { title: { display: true, text: 'Concentration (mg/m³)' } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('flowRateChart'), {
+        type: 'line',
+        data: {
+            labels: distance,
+            datasets: [
+                { label: 'Intake Flow Rate', data: intakeFlowRate, borderColor: 'rgb(250, 204, 21)', fill: false },
+                { label: 'Return Flow Rate', data: returnFlowRate, borderColor: 'rgb(239, 68, 68)', fill: false }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Distance (m)' } },
+                y: { title: { display: true, text: 'Flow Rate (m³/s)' } }
+            }
+        }
+    });
+
+    function togglePanel(id) {
+        document.getElementById(id).classList.toggle('hidden');
+    }
+
+    function downloadChart(canvasId, filename) {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = document.getElementById(canvasId).toDataURL('image/png');
+        link.click();
+    }
+
+    function downloadTable() {
+        let csv = '';
+        const rows = document.querySelectorAll('#resultTable tr');
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('th, td');
+            const data = Array.from(cols).map(col => col.innerText.replace(/\n/g, ' ')).join(',');
+            csv += data + '\n';
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.download = 'concentration_table.csv';
+        link.href = window.URL.createObjectURL(blob);
+        link.click();
+    }
+    /*]]>*/
+</script>
+</html>
