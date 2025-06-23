@@ -1,10 +1,15 @@
 package com.conc.analysis.service;
 
-import java.io.*;
-import java.nio.file.*;
-import java.util.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.conc.analysis.form.InputData;
 
 @Service
@@ -29,7 +34,7 @@ public class ReadOutputFile {
             if (parts.length >= 6) {
                 try {
                     double[] rowData = new double[parts.length];
-                    for (int i = 0; i < parts.length; i++) {
+                    for (int i = 0; i < 6; i++) {
                         rowData[i] = Double.parseDouble(parts[i]);
                     }
                     parsedRows.add(rowData);
@@ -58,6 +63,7 @@ public class ReadOutputFile {
 
         // Output for verification
         System.out.println("Enter Air Flow Rate: " + enterAirFlowRate);
+        System.out.println("Leakages Count = " + leakageFlowRate.length);
         System.out.println("Leakage Flow Rates:");
         for (double v : leakageFlowRate) {
             System.out.println("  " + v);

@@ -55,6 +55,8 @@ public class Analysis2 {
         Result result = analysis.analyzeConcentration(inputdata2);
         result.setFanCount(inputData.getNfb());
         result.setDuctSegmentCount(inputData.getNoOfDuctSegments());
+        result.setDuctSegmentResistance(inputData.getDuctSegmentResistance());
+        result.setLeakageResistance(inputData.getLeakageResistance());
 
         return result;
     }

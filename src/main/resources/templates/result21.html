@@ -166,12 +166,14 @@
     <!-- <h3 class="text-lg font-semibold mb-3">Simulation Summary</h3> -->
     <table class="w-full border border-gray-300 text-sm text-center">
         <tbody>
-            <tr><td class="border px-2 py-1 font-medium">Mine Face Concentration</td><td class="border px-2 py-1" th:text="${result.concentrationAtFace} + ' mg/m³'"></td></tr>
+            <tr><td class="border px-2 py-1 font-medium">Concentration at Mine Face</td><td class="border px-2 py-1" th:text="${result.concentrationAtFace < 0} ? '-' : ${result.concentrationAtFace} + ' mg/m³'"></td></tr>            
             <tr><td class="border px-2 py-1 font-medium">Emission Rate</td><td class="border px-2 py-1" th:text="${result.emissionRate} + ' mg/s'"></td></tr>
-            <tr><td class="border px-2 py-1 font-medium">No. of Fans</td><td class="border px-2 py-1" th:text="${result.fanCount}"></td></tr>
-            <tr><td class="border px-2 py-1 font-medium">No. of Duct Segments</td><td class="border px-2 py-1" th:text="${result.ductSegmentCount}"></td></tr>
             <tr><td class="border px-2 py-1 font-medium">Enter Air Flow Rate</td><td class="border px-2 py-1" th:text="${result.enterAirFlowRate} + ' m³/s'"></td></tr>
             <tr><td class="border px-2 py-1 font-medium">Flow Rate at Face</td><td class="border px-2 py-1" th:text="${result.returnFlowRate[result.returnFlowRate.length - 1]} + ' m³/s'"></td></tr>
+            <tr><td class="border px-2 py-1 font-medium">No. of Fans</td><td class="border px-2 py-1" th:text="${result.fanCount}"></td></tr>
+            <tr><td class="border px-2 py-1 font-medium">No. of Duct Segments</td><td class="border px-2 py-1" th:text="${result.ductSegmentCount}"></td></tr>
+            <tr><td class="border px-2 py-1 font-medium">Duct Segment Resistance</td><td class="border px-2 py-1" th:text="${result.ductSegmentResistance} + ' Ns²/m⁸'"></td></tr>
+            <tr><td class="border px-2 py-1 font-medium">Assumed Resistance/leakage</td><td class="border px-2 py-1" th:text="${result.leakageResistance} + ' Ns²/m⁸'"></td></tr>
         </tbody>
     </table>
 </div>

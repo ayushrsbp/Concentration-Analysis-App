@@ -27,4 +27,6 @@ public class Result {
     private double emissionRate;
     private double enterAirFlowRate;
     private int ductSegmentCount;
+    private double ductSegmentResistance;
+    private double leakageResistance;
 }
