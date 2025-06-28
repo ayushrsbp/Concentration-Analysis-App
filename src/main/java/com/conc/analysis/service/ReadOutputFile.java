@@ -64,10 +64,10 @@ public class ReadOutputFile {
         // Output for verification
         System.out.println("Enter Air Flow Rate: " + enterAirFlowRate);
         System.out.println("Leakages Count = " + leakageFlowRate.length);
-        System.out.println("Leakage Flow Rates:");
-        for (double v : leakageFlowRate) {
-            System.out.println("  " + v);
-        }
+        // System.out.println("Leakage Flow Rates:");
+        // for (double v : leakageFlowRate) {
+        //     System.out.println("  " + v);
+        // }
         // Update inputData
         inputData.setEnterAirFlowRate(enterAirFlowRate);
         inputData.setLeakageFlowRate(leakageFlowRate);

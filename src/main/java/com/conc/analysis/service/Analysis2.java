@@ -31,7 +31,7 @@ public class Analysis2 {
 
         createInputFile.createInputFile(inputData);
 
-        // 🔧 Run net.exe
+        // Run net.exe
         String dir = "src\\main\\resources\\static\\outputFiles";
         ProcessBuilder pb = new ProcessBuilder("src\\main\\resources\\static\\outputFiles\\net.exe");
         pb.directory(new File(dir)); // Set working directory
@@ -39,7 +39,7 @@ public class Analysis2 {
         Process process = pb.start();
         System.out.println("Running net.exe...");
 
-        // ⏳ Wait for 2 seconds
+        // Wait for 2 seconds
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
