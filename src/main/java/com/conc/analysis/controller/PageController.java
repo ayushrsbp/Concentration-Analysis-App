@@ -8,11 +8,16 @@ public class PageController {
 
     @RequestMapping("/home")
     public String home() {
-        return "airquantitydata";
+        return "home";
     }
 
-    @RequestMapping("/testing")
+    @RequestMapping("/problem1")
     public String testing() {
         return "problem";
+    }
+
+    @RequestMapping("/problem2")
+    public String problem2() {
+        return "problem2";
     }
 }

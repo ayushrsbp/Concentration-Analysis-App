@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent})}">
+
+<section id="content" class="w-full flex flex-col items-center gap-6">
+
+    <h2 class="text-2xl font-bold mt-4">Enter Simulation Parameters</h2>
+
+    <form th:action="@{/optimize}" method="post" class="w-full max-w-lg space-y-4">
+
+        <!-- Standard Inputs -->
+
+        <div>
+            <label for="noOfDuctSegments" class="block font-medium">No. of Duct Segments:</label>
+            <input type="number" name="noOfDuctSegments" id="noOfDuctSegments" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="emissionRate" class="block font-medium">Emission Rate (mg/sec):</label>
+            <input type="number" step="any" name="emissionRate" id="emissionRate" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="segmentLength" class="block font-medium">Duct Segment Length (m):</label>
+            <input type="number" name="segmentLength" id="segmentLength" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="frictionFactor" class="block font-medium">Friction Factor (kg/m):</label>
+            <input type="number" step="any" name="frictionFactor" id="frictionFactor" class="w-full border p-2 rounded" required>
+        </div>
+
+        <!-- Fan Characteristics -->
+        <div class="text-base font-semibold text-blue-700">Fan characteristics of the form P = AQ² + B</div>
+
+        <div>
+            <label for="a" class="block font-medium">Enter the value of A:</label>
+            <input type="number" step="any" name="a" id="a" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div>
+            <label for="b" class="block font-medium">Enter the value of B:</label>
+            <input type="number" step="any" name="b" id="b" class="w-full border p-2 rounded" required>
+        </div>
+
+        <!-- Optimization Table -->
+        <div>
+            <h3 class="text-lg font-semibold text-center mt-4 mb-2">Optimization Parameters</h3>
+            <table class="w-full border border-gray-300 text-sm text-center">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="border px-2 py-2">Parameter</th>
+                        <th class="border px-2 py-2">Min Value</th>
+                        <th class="border px-2 py-2">Max Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="border px-2 py-2 font-medium">Allowed Concentration (mg/m³)</td>
+                        <td class="border px-2 py-2"><input type="number" step="any" name="allowedConcentrationMin" class="w-full border p-1 rounded" required></td>
+                        <td class="border px-2 py-2"><input type="number" step="any" name="allowedConcentrationMax" class="w-full border p-1 rounded" required></td>
+                    </tr>
+                    <tr>
+                        <td class="border px-2 py-2 font-medium">Duct Diameter (m)</td>
+                        <td class="border px-2 py-2"><input type="number" step="any" name="ductDiameterMin" class="w-full border p-1 rounded" required></td>
+                        <td class="border px-2 py-2"><input type="number" step="any" name="ductDiameterMax" class="w-full border p-1 rounded" required></td>
+                    </tr>
+                    <tr>
+                        <td class="border px-2 py-2 font-medium">No. of Fans</td>
+                        <td class="border px-2 py-2"><input type="number" name="fanCountMin" class="w-full border p-1 rounded" required></td>
+                        <td class="border px-2 py-2"><input type="number" name="fanCountMax" class="w-full border p-1 rounded" required></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Submit Button Centered -->
+        <div class="flex justify-center">
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                Optimize
+            </button>
+        </div>
+    </form>
+
+</section>
+</html>
