@@ -11,6 +11,7 @@ import com.conc.analysis.results.Result;
 import com.conc.analysis.service.Analysis;
 import com.conc.analysis.service.Analysis2;
 import com.conc.analysis.form.InputData2;
+import com.conc.analysis.form.InputData3;
 
 @Controller
 public class FormController {
@@ -35,5 +36,10 @@ public class FormController {
         Result result = analysis2.analyze(inputData);
         model.addAttribute("result", result);
         return "result21";
+    }
+
+    @PostMapping("/optimize")
+    public String optimize(@ModelAttribute InputData3 inputData, Model model) {
+        return "";
     }
 }
