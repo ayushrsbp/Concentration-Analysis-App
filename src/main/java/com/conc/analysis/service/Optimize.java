@@ -2,7 +2,10 @@ package com.conc.analysis.service;
 
 import com.conc.analysis.form.InputData3;
 import com.conc.analysis.form.InputData2;
+import com.conc.analysis.results.Result;
+import com.conc.analysis.service.Analysis2;
 
+import java.io.IOException;
 import java.util.*;
 
 import org.springframework.stereotype.Service;
@@ -13,22 +16,24 @@ public class Optimize {
     @Autowired
     private InputData2 inputData2;
 
-    public void otimize(InputData3 inputData) {
+    @Autowired
+    private Analysis2 analysis2;
+
+    public Result optimize(InputData3 inputData) throws IOException {
         int noOfDuctSegments = inputData.getNoOfDuctSegments();
         double emissionRate = inputData.getEmissionRate();
         int segmentLength = inputData.getSegmentLength();
         double frictionFactor = inputData.getFrictionFactor();
         double a = inputData.getA();
         double b = inputData.getB();
-        double allowedConcentrationMin = inputData.getAllowedConcentrationMin();
-        double allowedConcentrationMax = inputData.getAllowedConcentrationMax();
-        int fanCountMin = inputData.getFanCountMin();
-        int fanCountMax = inputData.getFanCountMax();
-        double[][] ducts = inputData.getDucts();
+        double maxAllowedConcentration = inputData.getMaxAllowedConcentration();
+        double[] ducts = inputData.getDuctDiameters();
+        // List<Double> ducts = inputData.getDuctDiameters();
 
-        Arrays.sort(ducts, (x, y) -> Double.compare(x[0], y[0]));
-
-        for(int fan = fanCountMin; fan <= fanCountMax; fan++) {
+        // Collections.sort(ducts);
+        Arrays.sort(ducts);
+        Result ultimateOptimum = null;
+        for(int fan = 0; fan <= (noOfDuctSegments*segmentLength)/250; fan++) {
             inputData2.setNff(0);
             inputData2.setNfb(fan);
             inputData2.setIter(30);
@@ -39,12 +44,14 @@ public class Optimize {
             inputData2.setEmissionRate(emissionRate);
             inputData2.setSegmentLength(segmentLength);
             int[] fanPos = new int[fan];
-            int curr = 1;
-            int loadPerFan = noOfDuctSegments / fan;
-            int extra = noOfDuctSegments % fan;
-            for(int i = 0; i < fan; i++) {
-                fanPos[i] = curr;
-                curr += loadPerFan;
+            if(fan != 0) {
+                int curr = 1;
+                int loadPerFan = noOfDuctSegments / fan;
+                int extra = noOfDuctSegments % fan;
+                for(int i = 0; i < fan; i++) {
+                    fanPos[i] = curr;
+                    curr += loadPerFan;
+                }
             }
             // int fanPerExtra = extra / fan;
             // for(int i = 0; i < extra; i++) {
@@ -53,20 +60,31 @@ public class Optimize {
             inputData2.setFanPos(fanPos);
 
             int l = 0, r = ducts.length-1;
-            double optimumDia = -1;
-            double optimumFanCount = -1;
-            double optimumConcentration = -1;
+            Result optimum = null;
             while(l <= r) {
                 int mid = l+(r-l)/2;
-                double diameter = ducts[mid][0];
+                double diameter = ducts[mid];
                 double s = Math.PI*diameter*segmentLength;
                 double area = (Math.PI*diameter*diameter)/4;
 
                 double DuctSegmentResistance = (frictionFactor*s)/Math.pow(area, 3);
+                inputData2.setDuctSegmentResistance(DuctSegmentResistance);
+                inputData2.setLeakageResistance(DuctSegmentResistance*100);
 
-
-
+                Result result = analysis2.analyze(inputData2);
+                double concentration = result.getConcentrationAtFace();
+                if(concentration > 0 && concentration <= maxAllowedConcentration) {
+                    r = mid - 1;
+                    optimum = result;
+                } else {
+                    l = mid + 1;
+                }
+            }
+            if(optimum != null) {
+                ultimateOptimum = optimum;
+                break;
             }
         }
+        return ultimateOptimum;
     }
 }

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent})}">
+
+<section id="content" class="w-full flex flex-col items-center gap-6">
+    <h2 class="text-2xl font-bold mt-6">Network Analysis Result</h2>
+
+    <div class="overflow-x-auto w-full max-w-6xl">
+        <table class="table-auto w-full border-collapse border border-gray-400 text-center mt-4">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border border-gray-400 px-4 py-2">Branch No.</th>
+                    <th class="border border-gray-400 px-4 py-2">From</th>
+                    <th class="border border-gray-400 px-4 py-2">To</th>
+                    <th class="border border-gray-400 px-4 py-2">Po</th>
+                    <th class="border border-gray-400 px-4 py-2">Pt</th>
+                    <th class="border border-gray-400 px-4 py-2">Q</th>
+                    <th class="border border-gray-400 px-4 py-2">Res</th>
+                    <th class="border border-gray-400 px-4 py-2">Qmin</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="i : ${#numbers.sequence(0, result.no.length - 1)}">
+                    <td class="border border-gray-300 px-4 py-2" th:text="${i + 1}"></td>
+                    <td class="border border-gray-300 px-4 py-2" th:text="${result.no[i]}"></td>
+                    <td class="border border-gray-300 px-4 py-2" th:text="${result.nt[i]}"></td>
+                    <td class="border border-gray-300 px-4 py-2" th:text="${result.po[i]}"></td>
+                    <td class="border border-gray-300 px-4 py-2" th:text="${result.pt[i]}"></td>
+                    <td class="border border-gray-300 px-4 py-2" th:text="${result.q[i]}"></td>
+                    <td class="border border-gray-300 px-4 py-2" th:text="${result.r[i]}"></td>
+                    <td class="border border-gray-300 px-4 py-2" th:text="${result.qMin[i]}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</html>

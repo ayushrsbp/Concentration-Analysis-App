@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent})}">
+
+<section id="content" class="w-full flex flex-col items-center gap-6">
+
+  <h2 class="text-2xl font-bold mt-4">Provide Network Information</h2>
+
+  <form id="netForm" th:action="@{/netAnalysis}" method="post" class="w-full max-w-lg space-y-4">
+
+    <!-- Number inputs -->
+    <div class="flex flex-col gap-2">
+      <label class="font-medium">Number of Fixed Flow Branches</label>
+      <input type="number" name="nff" id="nff" class="border p-2 rounded w-full" required oninput="renderFixedFlowTable()"/>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-medium">Number of Fan Branches</label>
+      <input type="number" name="nfb" id="nfb" class="border p-2 rounded w-full" required oninput="renderFanBranchTable()"/>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-medium">Number of Nodes</label>
+      <input type="number" name="nn" class="border p-2 rounded w-full" required />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-medium">Max Iterations</label>
+      <input type="number" name="iter" class="border p-2 rounded w-full" required />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-medium">Error Tolerance</label>
+      <input type="number" name="err" step="any" class="border p-2 rounded w-full" required />
+    </div>
+
+    <!-- Fixed Flow Branches Table -->
+    <div class="flex flex-col gap-2" id="fixedFlowContainer" style="display: none;">
+      <label class="font-medium">Fixed Flow Branches</label>
+      <table class="w-full border" id="fixedFlowTable">
+        <tr><th>From</th><th>To</th><th>Resistance</th><th>Fixed Flow</th></tr>
+      </table>
+    </div>
+
+    <!-- Fan Branches Table -->
+    <div class="flex flex-col gap-2" id="fanBranchContainer" style="display: none;">
+      <label class="font-medium">Fan Branches</label>
+      <table class="w-full border" id="fanBranchTable">
+        <tr><th>From</th><th>To</th><th>Resistance</th><th>A</th><th>B</th></tr>
+      </table>
+    </div>
+
+    <!-- Remaining Branches Table -->
+    <div class="flex flex-col gap-2">
+      <label class="font-medium">Remaining Branches</label>
+      <table class="w-full border" id="remainingBranchTable" onchange="addRow('remainingBranchTable')">
+        <tr><th>From</th><th>To</th><th>Resistance</th></tr>
+        <tr>
+          <td><input name="no[]" type="number" class="border w-full p-1"></td>
+          <td><input name="nt[]" type="number" class="border w-full p-1"></td>
+          <td><input name="r[]" type="number" step="any" class="border w-full p-1"></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="flex justify-center">
+      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Submit</button>
+    </div>
+  </form>
+
+  <!-- JavaScript -->
+  <script>
+    function renderFixedFlowTable() {
+      const count = parseInt(document.getElementById("nff").value);
+      const container = document.getElementById("fixedFlowContainer");
+      const table = document.getElementById("fixedFlowTable");
+
+      table.innerHTML = '<tr><th>From</th><th>To</th><th>Resistance</th><th>Fixed Flow</th></tr>';
+      if (count > 0) {
+        container.style.display = "block";
+        for (let i = 0; i < count; i++) {
+          const row = `<tr>
+            <td><input name="nffo[]" type="number" class="border w-full p-1" required></td>
+            <td><input name="nfft[]" type="number" class="border w-full p-1" required></td>
+            <td><input name="rff[]" type="number" step="any" class="border w-full p-1" required></td>
+            <td><input name="qff[]" type="number" step="any" class="border w-full p-1" required></td>
+          </tr>`;
+          table.innerHTML += row;
+        }
+      } else {
+        container.style.display = "none";
+      }
+    }
+
+    function renderFanBranchTable() {
+      const count = parseInt(document.getElementById("nfb").value);
+      const container = document.getElementById("fanBranchContainer");
+      const table = document.getElementById("fanBranchTable");
+
+      table.innerHTML = '<tr><th>From</th><th>To</th><th>Resistance</th><th>A</th><th>B</th></tr>';
+      if (count > 0) {
+        container.style.display = "block";
+        for (let i = 0; i < count; i++) {
+          const row = `<tr>
+            <td><input name="no[]" type="number" class="border w-full p-1" required></td>
+            <td><input name="nt[]" type="number" class="border w-full p-1" required></td>
+            <td><input name="r[]" type="number" step="any" class="border w-full p-1" required></td>
+            <td><input name="a[]" type="number" step="any" class="border w-full p-1" required></td>
+            <td><input name="fb[]" type="number" step="any" class="border w-full p-1" required></td>
+          </tr>`;
+          table.innerHTML += row;
+        }
+      } else {
+        container.style.display = "none";
+      }
+    }
+
+    function addRow(tableId) {
+      const table = document.getElementById(tableId);
+      const lastRow = table.rows[table.rows.length - 1];
+      const inputs = lastRow.querySelectorAll('input');
+      let allFilled = true;
+      inputs.forEach(input => { if (input.value === '') allFilled = false; });
+      if (!allFilled) return;
+
+      const newRow = lastRow.cloneNode(true);
+      newRow.querySelectorAll('input').forEach(input => input.value = '');
+      table.appendChild(newRow);
+    }
+
+    // Validate Remaining Branches on Submit
+    document.getElementById("netForm").addEventListener("submit", function (e) {
+      const table = document.getElementById("remainingBranchTable");
+      const rows = table.querySelectorAll("tr");
+
+      let valid = true;
+      rows.forEach((row, idx) => {
+        const inputs = row.querySelectorAll("input");
+        const emptyInputs = Array.from(inputs).filter(input => input.value.trim() === '');
+
+        if (inputs.length === 3) {
+          if (idx === rows.length - 1 && emptyInputs.length === 3) {
+            // Last row and all fields are empty — remove inputs to avoid sending them
+            inputs.forEach(input => input.remove());
+          } else if (emptyInputs.length > 0) {
+            valid = false;
+          }
+        }
+      });
+
+      if (!valid) {
+        e.preventDefault();
+        alert("All fields in the Remaining Branches (except last empty row) must be filled!");
+      }
+    });
+  </script>
+
+</section>
+</html>

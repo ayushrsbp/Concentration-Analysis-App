@@ -6,9 +6,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class PageController {
 
-    @RequestMapping("/home")
+    @RequestMapping("/")
     public String home() {
         return "home";
+    }
+
+    @RequestMapping("/net")
+    public String net() {
+        return "net";
     }
 
     @RequestMapping("/problem1")

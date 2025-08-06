@@ -42,8 +42,13 @@
             <input type="number" step="any" name="b" id="b" class="w-full border p-2 rounded" required>
         </div>
 
-        <!-- Optimization Table -->
         <div>
+            <label for="maxAllowedConcentration" class="block font-medium">Enter the value of maximum allowed Concentration:</label>
+            <input type="number" step="any" name="maxAllowedConcentration" id="maxAllowedConcentration" class="w-full border p-2 rounded" required>
+        </div>
+
+        <!-- Optimization Table -->
+        <!-- <div>
             <h3 class="text-lg font-semibold text-center mt-4 mb-2">Optimization Parameters</h3>
             <table class="w-full border border-gray-300 text-sm text-center">
                 <thead class="bg-gray-200">
@@ -66,7 +71,7 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </div> -->
 
         <!-- Duct Standards Table -->
         <div>
@@ -76,7 +81,7 @@
                     <tr>
                         <th class="border px-2 py-2">#</th>
                         <th class="border px-2 py-2">Diameter (m)</th>
-                        <th class="border px-2 py-2">Cost per Meter (₹)</th>
+                        <!-- <th class="border px-2 py-2">Cost per Meter (₹)</th> -->
                     </tr>
                 </thead>
                 <tbody id="ductStandardBody">
@@ -84,17 +89,17 @@
                     <tr>
                         <td class="border px-2 py-1">1</td>
                         <td class="border px-2 py-1"><input type="number" step="any" name="ductDiameters[0]" class="w-full border p-1 rounded" required></td>
-                        <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[0]" class="w-full border p-1 rounded" required></td>
+                        <!-- <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[0]" class="w-full border p-1 rounded" required></td> -->
                     </tr>
                     <tr>
                         <td class="border px-2 py-1">2</td>
                         <td class="border px-2 py-1"><input type="number" step="any" name="ductDiameters[1]" class="w-full border p-1 rounded"></td>
-                        <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[1]" class="w-full border p-1 rounded"></td>
+                        <!-- <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[1]" class="w-full border p-1 rounded"></td> -->
                     </tr>
                     <tr>
                         <td class="border px-2 py-1">3</td>
                         <td class="border px-2 py-1"><input type="number" step="any" name="ductDiameters[2]" class="w-full border p-1 rounded"></td>
-                        <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[2]" class="w-full border p-1 rounded"></td>
+                        <!-- <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[2]" class="w-full border p-1 rounded"></td> -->
                     </tr>
                 </tbody>
             </table>
@@ -116,16 +121,16 @@
             const rows = tbody.querySelectorAll("tr");
             const lastRow = rows[rows.length - 1];
             const diameter = lastRow.querySelector(`input[name^='ductDiameters']`);
-            const cost = lastRow.querySelector(`input[name^='ductCosts']`);
+            // const cost = lastRow.querySelector(`input[name^='ductCosts']`);
 
-            if (diameter.value && cost.value) {
+            if (diameter.value) {
                 const index = rows.length;
                 const newRow = document.createElement("tr");
 
                 newRow.innerHTML = `
                     <td class="border px-2 py-1">${index + 1}</td>
                     <td class="border px-2 py-1"><input type="number" step="any" name="ductDiameters[${index}]" class="w-full border p-1 rounded"></td>
-                    <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[${index}]" class="w-full border p-1 rounded"></td>
+                    <!-- <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[${index}]" class="w-full border p-1 rounded"></td> -->
                 `;
                 tbody.appendChild(newRow);
             }

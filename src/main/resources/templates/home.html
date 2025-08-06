@@ -1,8 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent})}">
 <section id="content" >
-    <h2 class="text-2xl font-semibold text-center">Welcome to Gas Concentration Anlaysis Dashboard</h2>
+    <!-- <h2 class="text-2xl font-semibold text-center">Welcome to Gas Concentration Anlaysis Dashboard</h2> -->
     <div class="flex flex-col items-center w-full gap-4">
+
+        <div class="bg-blue-600 rounded-lg p-4 w-full max-w-sm">
+            <a data-th-href="@{'/net'}" class="block text-white font-semibold text-center hover:underline">
+                Network Analysis
+            </a>
+        </div>
+
         <div class="bg-blue-600 rounded-lg p-4 w-full max-w-sm">
             <a data-th-href="@{'/problem1'}" class="block text-white font-semibold text-center hover:underline">
                 Problem 1
@@ -12,42 +19,6 @@
         <div class="bg-blue-600 rounded-lg p-4 w-full max-w-sm">
             <a data-th-href="@{'/problem2'}" class="block text-white font-semibold text-center hover:underline">
                 Problem2
-            </a>
-        </div>
-
-        <div class="bg-blue-600 rounded-lg p-4 w-full max-w-sm">
-            <a data-th-href="@{'/problem3'}" class="block text-white font-semibold text-center hover:underline">
-                Problem 3
-            </a>
-        </div>
-
-        <div class="bg-blue-600 rounded-lg p-4 w-full max-w-sm">
-            <a data-th-href="@{'/problem4'}" class="block text-white font-semibold text-center hover:underline">
-                Problem 4
-            </a>
-        </div>
-
-        <div class="bg-blue-600 rounded-lg p-4 w-full max-w-sm">
-            <a data-th-href="@{'/contact'}" class="block text-white font-semibold text-center hover:underline">
-                Problem 5
-            </a>
-        </div>
-
-        <div class="bg-blue-600 rounded-lg p-4 w-full max-w-sm">
-            <a data-th-href="@{'/contact'}" class="block text-white font-semibold text-center hover:underline">
-                Problem 6
-            </a>
-        </div>
-
-        <div class="bg-blue-600 rounded-lg p-4 w-full max-w-sm">
-            <a data-th-href="@{'/contact'}" class="block text-white font-semibold text-center hover:underline">
-                Problem 7
-            </a>
-        </div>
-
-        <div class="bg-blue-600 rounded-lg p-4 w-full max-w-sm">
-            <a data-th-href="@{'/contact'}" class="block text-white font-semibold text-center hover:underline">
-                Problem 8
             </a>
         </div>
     </div>

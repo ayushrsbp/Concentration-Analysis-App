@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,9 +20,7 @@ public class InputData3 {
     private double frictionFactor;
     private double a;
     private double b;
-    private double allowedConcentrationMin;
-    private double allowedConcentrationMax;
-    private int fanCountMin;
-    private int fanCountMax;
-    private double[][] ducts;
+    private double maxAllowedConcentration;
+    private double[] ductDiameters;
+    // private List<Double> ductDiameters;
 }

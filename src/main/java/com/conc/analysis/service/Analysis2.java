@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.conc.analysis.form.InputData;
 import com.conc.analysis.form.InputData2;
+import com.conc.analysis.form.NetForm;
 import com.conc.analysis.results.Result;
 
 
@@ -24,12 +25,16 @@ public class Analysis2 {
     @Autowired
     private Analysis analysis;
 
+    // @Autowired
+    // private NetForm netForm;
+
     public Result analyze(InputData2 inputData) throws IOException {
 
         double emissionRate = inputData.getEmissionRate();
         int segmentLength = inputData.getSegmentLength();
 
-        createInputFile.createInputFile(inputData);
+
+        NetForm netForm = createInputFile.createInputFile(inputData);
 
         // Run net.exe
         String dir = "src\\main\\resources\\static\\outputFiles";
