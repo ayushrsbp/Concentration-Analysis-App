@@ -93,8 +93,6 @@ public class CreateInputFile {
                 temp_no.add(i);
                 temp_nt.add(i-1);
                 temp_r.add(ductSegmentResistance);
-                temp_a.add(0.0);
-                temp_fb.add(0.0);
             }
         }
 
@@ -102,15 +100,11 @@ public class CreateInputFile {
         temp_no.add(3);
         temp_nt.add(2);
         temp_r.add(ductSegmentResistance);
-        temp_a.add(0.0);
-        temp_fb.add(0.0);
 
         writer.write("2 1 " + String.format(Locale.US, "%.3f", ductSegmentResistance / 2.0) + "\n");
         temp_no.add(2);
         temp_nt.add(1);
         temp_r.add(ductSegmentResistance);
-        temp_a.add(0.0);
-        temp_fb.add(0.0);
 
         // Next lines for each leakage branch
         for (int i = 3; i < nn; i++) {
@@ -121,8 +115,6 @@ public class CreateInputFile {
                 temp_no.add(i);
                 temp_nt.add(1);
                 temp_r.add(leakageResistance);
-                temp_a.add(0.0);
-                temp_fb.add(0.0);
             }
         }
 
@@ -131,17 +123,30 @@ public class CreateInputFile {
         temp_no.add(nn);
         temp_nt.add(1);
         temp_r.add(0.000001);
-        temp_a.add(0.0);
-        temp_fb.add(0.0);
         
         writer.close();
         System.out.println("Input file created at " + filePath);
         int nBranches = temp_no.size();
-        // netForm.setNo(temp_no.toArray(new int[nBranches]));
-        // netForm.setNt(temp_nt.toArray(new int[nBranches]));
-        // netForm.setR(temp_r.toArray(new double[nBranches]));
-        // netForm.setA(temp_a.toArray(new double[nBranches]));
-        // netForm.setFb(temp_fb.toArray(new double[nBranches]));
+        int[] no = new int[nBranches];
+        int[] nt = new int[nBranches];
+        double[] r = new double[nBranches];
+        double[] A = new double[nfb];
+        double[] fb = new double[nfb];
+        for(int i = 0; i < nfb; i++) {
+            A[i] = temp_a.get(i);
+            fb[i] = temp_fb.get(i);
+        }
+        for(int i = 0; i < nBranches; i++) {
+            no[i] = temp_no.get(i);
+            nt[i] = temp_nt.get(i);
+            r[i]  = temp_r.get(i);
+        }
+        netForm.setNo(no);
+        netForm.setNt(nt);
+        netForm.setR(r);
+        netForm.setA(A);
+        netForm.setFb(fb);
+
         return netForm;
     }
 }
