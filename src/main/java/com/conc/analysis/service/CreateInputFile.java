@@ -99,12 +99,12 @@ public class CreateInputFile {
         writer.write("3 2 " + String.format(Locale.US, "%.3f", ductSegmentResistance / 2.0) + "\n");
         temp_no.add(3);
         temp_nt.add(2);
-        temp_r.add(ductSegmentResistance);
+        temp_r.add(ductSegmentResistance/2.0);
 
         writer.write("2 1 " + String.format(Locale.US, "%.3f", ductSegmentResistance / 2.0) + "\n");
         temp_no.add(2);
         temp_nt.add(1);
-        temp_r.add(ductSegmentResistance);
+        temp_r.add(ductSegmentResistance/2.0);
 
         // Next lines for each leakage branch
         for (int i = 3; i < nn; i++) {
@@ -146,6 +146,20 @@ public class CreateInputFile {
         netForm.setR(r);
         netForm.setA(A);
         netForm.setFb(fb);
+
+        int[] x = netForm.getNo();
+        int[] y = netForm.getNt();
+        double[] z = netForm.getR();
+        double[] s =  netForm.getA();
+        double[] t = netForm.getFb();
+
+        for(int i = 0; i < nBranches; i++) {
+            System.out.println(""+ x[i] + " " + y[i] + " " + z[i]);
+        }
+
+        for(int i = 0; i < nfb; i++) {
+            System.out.println("" + s[i] + " " + t[i]);
+        }
 
         return netForm;
     }

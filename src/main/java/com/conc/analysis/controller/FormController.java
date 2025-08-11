@@ -23,7 +23,7 @@ import com.conc.analysis.results.NetResult;
 public class FormController {
 
     @Autowired
-    private NetAnalysis netAnalysis;
+    private NetAnalysis networkAnalysis;
 
     @Autowired
     private Analysis analysis;
@@ -36,7 +36,7 @@ public class FormController {
 
     @PostMapping("/netAnalysis")
     public String netAnalysis(NetForm input, Model model) throws IOException {
-        NetResult result = netAnalysis.solve(input);
+        NetResult result = networkAnalysis.solve(input);
         model.addAttribute("result", result);
         return "netResult";
         // This method can be used to handle net analysis if needed
@@ -55,13 +55,13 @@ public class FormController {
                        Model model) throws IOException {
         Result result = analysis2.analyze(inputData);
         model.addAttribute("result", result);
-        return "result21";
+        return "result";
     }
 
     @PostMapping("/optimize")
     public String problem2(@ModelAttribute InputData3 inputData, Model model) throws IOException {
         Result result = optimize.optimize(inputData);
         model.addAttribute("result", result);
-        return "result21";
+        return "result";
     }
 }

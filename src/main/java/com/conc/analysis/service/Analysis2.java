@@ -29,7 +29,8 @@ public class Analysis2 {
     private Analysis analysis;
 
     @Autowired
-    private NetAnalysis netAnalysis;
+    private NetworkAnalysis netAnalysis;
+    // private NetAnalysis netAnalysis;
 
     @Autowired
     private InputData inputData2;
@@ -60,6 +61,11 @@ public class Analysis2 {
         int p = 0;
         for(double flowRate : leakageList) {
             leakageFlowRate[p++] = flowRate;
+        }
+        System.out.println("Checking of input data for conc analysis");
+        System.out.println(entryFlowRate);
+        for(int i = 0; i < leakageFlowRate.length; i++) {
+            System.out.println(leakageFlowRate[i]);
         }
         inputData2.setEmissionRate(emissionRate);
         inputData2.setSegmentLength(segmentLength);
