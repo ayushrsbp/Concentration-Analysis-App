@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent})}">
+
+<section id="content" class="w-full flex flex-col items-center gap-6">
+
+    <h2 class="text-2xl font-bold mt-4">System Information</h2>
+
+    <div class="w-full max-w-lg">
+        <table class="w-full border border-gray-300 text-sm text-center">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border px-4 py-2">Parameter</th>
+                    <th class="border px-4 py-2">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="border px-4 py-2 font-medium">Operating System</td>
+                    <td class="border px-4 py-2" th:text="${info.os}"></td>
+                </tr>
+                <tr>
+                    <td class="border px-4 py-2 font-medium">Version</td>
+                    <td class="border px-4 py-2" th:text="${info.version}"></td>
+                </tr>
+                <tr>
+                    <td class="border px-4 py-2 font-medium">Architecture</td>
+                    <td class="border px-4 py-2" th:text="${info.architecture}"></td>
+                </tr>
+                <tr>
+                    <td class="border px-4 py-2 font-medium">Java Version</td>
+                    <td class="border px-4 py-2" th:text="${info.javaVersion}"></td>
+                </tr>
+                <tr>
+                    <td class="border px-4 py-2 font-medium">User</td>
+                    <td class="border px-4 py-2" th:text="${info.user}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</section>
+</html>
