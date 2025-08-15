@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.conc.analysis.form.InputData2;
 import com.conc.analysis.form.NetForm;
 
+@Scope("prototype")
 @Service
 public class CreateInputFile {
 

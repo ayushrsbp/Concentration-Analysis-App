@@ -1,29 +1,25 @@
 package com.conc.analysis.service;
 
-import java.util.*;
-import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.conc.analysis.form.InputData;
-import com.conc.analysis.form.InputData2;
 import com.conc.analysis.form.NetForm;
+import com.conc.analysis.form.InputData2;
 import com.conc.analysis.results.Result;
 import com.conc.analysis.results.NetResult;
 
-import com.conc.analysis.service.NetAnalysis;
-
-
+@Scope("prototype")
 @Service
 public class Analysis2 {
 
     @Autowired
     private CreateInputFile createInputFile;
-    
-    @Autowired
-    private ReadOutputFile readOutputFile;
 
     @Autowired
     private Analysis analysis;

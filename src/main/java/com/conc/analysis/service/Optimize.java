@@ -1,16 +1,20 @@
 package com.conc.analysis.service;
 
-import com.conc.analysis.form.InputData3;
-import com.conc.analysis.form.InputData2;
-import com.conc.analysis.results.Result;
-import com.conc.analysis.service.Analysis2;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
+import com.conc.analysis.entities.DuctSpecification;
+import com.conc.analysis.form.InputData2;
+import com.conc.analysis.form.InputData3;
+import com.conc.analysis.results.OptimizeResult;
+import com.conc.analysis.results.Result;
+
+@Scope("prototype")
 @Service
 public class Optimize {
     @Autowired
@@ -19,72 +23,87 @@ public class Optimize {
     @Autowired
     private Analysis2 analysis2;
 
-    public Result optimize(InputData3 inputData) throws IOException {
-        int noOfDuctSegments = inputData.getNoOfDuctSegments();
+    @Autowired
+    private OptimizeResult optimizeResult;
+
+    @Autowired
+    private DuctSpecification ductSpecification;
+
+    public OptimizeResult optimize(InputData3 inputData) throws IOException {
         double emissionRate = inputData.getEmissionRate();
-        int segmentLength = inputData.getSegmentLength();
-        double frictionFactor = inputData.getFrictionFactor();
         double a = inputData.getA();
         double b = inputData.getB();
-        double maxAllowedConcentration = inputData.getMaxAllowedConcentration();
-        double[] ducts = inputData.getDuctDiameters();
-        // List<Double> ducts = inputData.getDuctDiameters();
+        double[] ductDiameters = inputData.getDuctDiameters();
+        double[] frictionFactor = inputData.getFrictionFactor();
+        int[] segmentLength = inputData.getSegmentLength();
+        int[] segmentCount = inputData.getSegmentCount();
+        double[] leakageResistance = inputData.getLeakageResistance();
 
-        // Collections.sort(ducts);
-        Arrays.sort(ducts);
-        Result ultimateOptimum = null;
-        for(int fan = 0; fan <= (noOfDuctSegments*segmentLength)/250; fan++) {
-            inputData2.setNff(0);
-            inputData2.setNfb(fan);
-            inputData2.setIter(30);
-            inputData2.setErr(0.0005);
-            inputData2.setA(a);
-            inputData2.setB(b);
-            inputData2.setNoOfDuctSegments(noOfDuctSegments);
-            inputData2.setEmissionRate(emissionRate);
-            inputData2.setSegmentLength(segmentLength);
-            int[] fanPos = new int[fan];
-            if(fan != 0) {
-                int curr = 1;
-                int loadPerFan = noOfDuctSegments / fan;
-                int extra = noOfDuctSegments % fan;
-                for(int i = 0; i < fan; i++) {
-                    fanPos[i] = curr;
-                    curr += loadPerFan;
+
+        
+        int noOfDuctType = ductDiameters.length;
+        DuctSpecification[] ductData = new DuctSpecification[noOfDuctType];
+
+        List<Double>[] concentrations = new ArrayList[noOfDuctType];
+        List<Double>[] airFlowRateAtFace = new ArrayList[noOfDuctType];
+        List<Double>[] airFlowRateAtEntry = new ArrayList[noOfDuctType];
+        for(int i = 0 ; i< noOfDuctType; i++) {
+            int maxFan =(segmentCount[i]*segmentLength[i])/200;
+            concentrations[i] = new ArrayList<>();
+            airFlowRateAtFace[i] = new ArrayList<>();
+            airFlowRateAtEntry[i] = new ArrayList<>();
+            for(int fan = 1; fan <= maxFan; fan++) {
+                int nff = 0;
+                int nfb = fan;
+                int iter = 40;
+                double err = 0.0005;
+                int noOfDuctSegments = segmentCount[i];
+                // double a, b;
+                double f = frictionFactor[i];
+                double s = Math.PI*ductDiameters[i]*segmentLength[i];
+                double area = (Math.PI * ductDiameters[i] * ductDiameters[i])/4;
+                double ductSegmentResistance = (f * s)/Math.pow(area, 3);
+                // double leakageResistance;
+                int[] fanPos = new int[fan];
+                fanPos[0] = 1;
+                for(int pos = 1; pos < fan; pos++) {
+                    fanPos[pos] = fanPos[pos-1] + noOfDuctSegments/fan;
                 }
-            }
-            // int fanPerExtra = extra / fan;
-            // for(int i = 0; i < extra; i++) {
+                // double emissionRate;
+                int l = segmentLength[i];
 
-            // }
-            inputData2.setFanPos(fanPos);
-
-            int l = 0, r = ducts.length-1;
-            Result optimum = null;
-            while(l <= r) {
-                int mid = l+(r-l)/2;
-                double diameter = ducts[mid];
-                double s = Math.PI*diameter*segmentLength;
-                double area = (Math.PI*diameter*diameter)/4;
-
-                double DuctSegmentResistance = (frictionFactor*s)/Math.pow(area, 3);
-                inputData2.setDuctSegmentResistance(DuctSegmentResistance);
-                inputData2.setLeakageResistance(DuctSegmentResistance*100);
+                inputData2.setNff(nff);
+                inputData2.setNfb(nfb);
+                inputData2.setIter(iter);
+                inputData2.setErr(err);
+                inputData2.setNoOfDuctSegments(noOfDuctSegments);
+                inputData2.setA(a);
+                inputData2.setB(b);
+                inputData2.setDuctSegmentResistance(ductSegmentResistance);
+                inputData2.setLeakageResistance(leakageResistance[i]*(l/100.0));
+                inputData2.setFanPos(fanPos);
+                inputData2.setEmissionRate(emissionRate);
+                inputData2.setSegmentLength(l);
 
                 Result result = analysis2.analyze(inputData2);
-                double concentration = result.getConcentrationAtFace();
-                if(concentration > 0 && concentration <= maxAllowedConcentration) {
-                    r = mid - 1;
-                    optimum = result;
-                } else {
-                    l = mid + 1;
-                }
+
+                concentrations[i].add(result.getConcentrationAtFace());
+                airFlowRateAtEntry[i].add(result.getEnterAirFlowRate());
+                double[] returnFlowRate = result.getReturnFlowRate();
+                airFlowRateAtFace[i].add(returnFlowRate[returnFlowRate.length-1]);
             }
-            if(optimum != null) {
-                ultimateOptimum = optimum;
-                break;
-            }
+            ductData[i] = new DuctSpecification();
+            ductData[i].setDuctDiameters(ductDiameters[i]);
+            ductData[i].setFrictionFactor(frictionFactor[i]);
+            ductData[i].setLeakageResistance(leakageResistance[i]);
+            ductData[i].setSegmentCount(segmentCount[i]);
+            ductData[i].setSegmentLength(segmentLength[i]);
         }
-        return ultimateOptimum;
+        optimizeResult.setConcentrations(concentrations);
+        optimizeResult.setAirFlowRateAtFace(airFlowRateAtFace);
+        optimizeResult.setAirFlowRateAtEntry(airFlowRateAtEntry);
+        optimizeResult.setDuctSpecification(ductData);
+
+        return optimizeResult;
     }
 }

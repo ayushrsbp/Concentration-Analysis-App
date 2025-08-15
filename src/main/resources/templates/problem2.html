@@ -1,141 +1,164 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent})}">
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent})}">
 
 <section id="content" class="w-full flex flex-col items-center gap-6">
 
-    <h2 class="text-2xl font-bold mt-4">Enter Simulation Parameters</h2>
+  <h2 class="text-2xl font-bold mt-4">Enter Simulation Parameters</h2>
 
-    <form th:action="@{/optimize}" method="post" class="w-full max-w-lg space-y-4">
+  <form id="optimizeForm" th:action="@{/optimize}" method="post" class="w-full max-w-lg space-y-4">
 
-        <!-- Standard Inputs -->
+    <!-- Emission Rate -->
+    <div>
+      <label for="emissionRate" class="block font-medium">Emission Rate (mg/sec):</label>
+      <input type="number" step="any" name="emissionRate" id="emissionRate" class="w-full border p-2 rounded" required>
+    </div>
 
-        <div>
-            <label for="noOfDuctSegments" class="block font-medium">No. of Duct Segments:</label>
-            <input type="number" name="noOfDuctSegments" id="noOfDuctSegments" class="w-full border p-2 rounded" required>
-        </div>
+    <!-- Fan Characteristics -->
+    <div class="text-base font-semibold text-blue-700">
+      Fan characteristics of the form P = AQ² + B
+    </div>
+    <div>
+      <label for="a" class="block font-medium">Enter the value of A:</label>
+      <input type="number" step="any" name="a" id="a" class="w-full border p-2 rounded" required>
+    </div>
+    <div>
+      <label for="b" class="block font-medium">Enter the value of B:</label>
+      <input type="number" step="any" name="b" id="b" class="w-full border p-2 rounded" required>
+    </div>
 
-        <div>
-            <label for="emissionRate" class="block font-medium">Emission Rate (mg/sec):</label>
-            <input type="number" step="any" name="emissionRate" id="emissionRate" class="w-full border p-2 rounded" required>
-        </div>
+    <!-- Duct Standards Table -->
+    <div>
+      <h3 class="text-lg font-semibold text-center mt-6 mb-2">Duct Standards</h3>
+      <table id="ductStandardsTable" class="w-full border border-gray-400 text-sm text-center">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-2 py-2">#</th>
+            <th class="border px-2 py-2">Diameter (m)</th>
+            <th class="border px-2 py-2">Friction Factor</th>
+            <th class="border px-2 py-2">Duct Segment Length (m)</th>
+            <th class="border px-2 py-2">No. of Segments</th>
+            <th class="border px-2 py-2">Leakage resistance/100m</th>
+          </tr>
+        </thead>
+        <tbody id="ductStandardBody">
+          <!-- First row is required -->
+          <tr>
+            <td class="border px-2 py-1">1</td>
+            <td class="border px-2 py-1">
+              <input type="number" step="any" name="ductDiameters[0]" class="w-full border p-1 rounded" required>
+            </td>
+            <td class="border px-2 py-1">
+              <input type="number" step="any" name="frictionFactor[0]" class="w-full border p-1 rounded" required>
+            </td>
+            <td class="border px-2 py-1">
+              <!-- Backend expects int for segmentLength, so step=1 -->
+              <input type="number" step="1" name="segmentLength[0]" class="w-full border p-1 rounded" required>
+            </td>
+            <td class="border px-2 py-1">
+              <!-- Keep original backend field name 'segementCount' if that's what your controller expects -->
+              <input type="number" step="1" name="segmentCount[0]" class="w-full border p-1 rounded" required>
+            </td>
+            <td class="border px-2 py-1">
+              <input type="number" step="any" name="leakageResistance[0]" class="w-full border p-1 rounded" required>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="text-xs text-gray-500 mt-1">
+        Tip: As soon as you complete all fields in the last row, a new optional row will appear automatically.
+      </p>
+    </div>
 
-        <div>
-            <label for="segmentLength" class="block font-medium">Duct Segment Length (m):</label>
-            <input type="number" name="segmentLength" id="segmentLength" class="w-full border p-2 rounded" required>
-        </div>
+    <!-- Submit Button -->
+    <div class="flex justify-center">
+      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+        Optimize
+      </button>
+    </div>
+  </form>
 
-        <div>
-            <label for="frictionFactor" class="block font-medium">Friction Factor (kg/m):</label>
-            <input type="number" step="any" name="frictionFactor" id="frictionFactor" class="w-full border p-2 rounded" required>
-        </div>
+  <!-- Dynamic rows + submit sanitization -->
+  <script>
+    const tbody = document.getElementById("ductStandardBody");
+    const form  = document.getElementById("optimizeForm");
 
-        <!-- Fan Characteristics -->
-        <div class="text-base font-semibold text-blue-700">Fan characteristics of the form P = AQ² + B</div>
+    function createRow(index) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="border px-2 py-1">${index + 1}</td>
+        <td class="border px-2 py-1"><input type="number" step="any" name="ductDiameters[${index}]" class="w-full border p-1 rounded"></td>
+        <td class="border px-2 py-1"><input type="number" step="any" name="frictionFactor[${index}]" class="w-full border p-1 rounded"></td>
+        <td class="border px-2 py-1"><input type="number" step="1"   name="segmentLength[${index}]" class="w-full border p-1 rounded"></td>
+        <td class="border px-2 py-1"><input type="number" step="1"   name="segmentCount[${index}]" class="w-full border p-1 rounded"></td>
+        <td class="border px-2 py-1"><input type="number" step="any" name="leakageResistance[${index}]" class="w-full border p-1 rounded"></td>
+      `;
+      return tr;
+    }
 
-        <div>
-            <label for="a" class="block font-medium">Enter the value of A:</label>
-            <input type="number" step="any" name="a" id="a" class="w-full border p-2 rounded" required>
-        </div>
+    function rowInputs(row) {
+      return Array.from(row.querySelectorAll("input"));
+    }
 
-        <div>
-            <label for="b" class="block font-medium">Enter the value of B:</label>
-            <input type="number" step="any" name="b" id="b" class="w-full border p-2 rounded" required>
-        </div>
+    function isRowAllFilled(row) {
+      return rowInputs(row).every(inp => inp.value.trim() !== "");
+    }
 
-        <div>
-            <label for="maxAllowedConcentration" class="block font-medium">Enter the value of maximum allowed Concentration:</label>
-            <input type="number" step="any" name="maxAllowedConcentration" id="maxAllowedConcentration" class="w-full border p-2 rounded" required>
-        </div>
+    function isRowAllEmpty(row) {
+      return rowInputs(row).every(inp => inp.value.trim() === "");
+    }
 
-        <!-- Optimization Table -->
-        <!-- <div>
-            <h3 class="text-lg font-semibold text-center mt-4 mb-2">Optimization Parameters</h3>
-            <table class="w-full border border-gray-300 text-sm text-center">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="border px-2 py-2">Parameter</th>
-                        <th class="border px-2 py-2">Min Value</th>
-                        <th class="border px-2 py-2">Max Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="border px-2 py-2 font-medium">Allowed Concentration (mg/m³)</td>
-                        <td class="border px-2 py-2"><input type="number" step="any" name="allowedConcentrationMin" class="w-full border p-1 rounded" required></td>
-                        <td class="border px-2 py-2"><input type="number" step="any" name="allowedConcentrationMax" class="w-full border p-1 rounded" required></td>
-                    </tr>
-                    <tr>
-                        <td class="border px-2 py-2 font-medium">No. of Fans</td>
-                        <td class="border px-2 py-2"><input type="number" name="fanCountMin" class="w-full border p-1 rounded" required></td>
-                        <td class="border px-2 py-2"><input type="number" name="fanCountMax" class="w-full border p-1 rounded" required></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div> -->
+    // Auto-add a new row when the last row is fully filled
+    tbody.addEventListener("input", () => {
+      const rows = tbody.querySelectorAll("tr");
+      const lastRow = rows[rows.length - 1];
+      if (isRowAllFilled(lastRow)) {
+        const newIndex = rows.length;
+        tbody.appendChild(createRow(newIndex));
+      }
+    });
 
-        <!-- Duct Standards Table -->
-        <div>
-            <h3 class="text-lg font-semibold text-center mt-6 mb-2">Duct Standards</h3>
-            <table id="ductStandardsTable" class="w-full border border-gray-400 text-sm text-center">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="border px-2 py-2">#</th>
-                        <th class="border px-2 py-2">Diameter (m)</th>
-                        <!-- <th class="border px-2 py-2">Cost per Meter (₹)</th> -->
-                    </tr>
-                </thead>
-                <tbody id="ductStandardBody">
-                    <!-- Initial 3 Rows -->
-                    <tr>
-                        <td class="border px-2 py-1">1</td>
-                        <td class="border px-2 py-1"><input type="number" step="any" name="ductDiameters[0]" class="w-full border p-1 rounded" required></td>
-                        <!-- <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[0]" class="w-full border p-1 rounded" required></td> -->
-                    </tr>
-                    <tr>
-                        <td class="border px-2 py-1">2</td>
-                        <td class="border px-2 py-1"><input type="number" step="any" name="ductDiameters[1]" class="w-full border p-1 rounded"></td>
-                        <!-- <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[1]" class="w-full border p-1 rounded"></td> -->
-                    </tr>
-                    <tr>
-                        <td class="border px-2 py-1">3</td>
-                        <td class="border px-2 py-1"><input type="number" step="any" name="ductDiameters[2]" class="w-full border p-1 rounded"></td>
-                        <!-- <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[2]" class="w-full border p-1 rounded"></td> -->
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    // On submit: validate, remove empty optional rows, and re-index names
+    form.addEventListener("submit", function (e) {
+      const rows = Array.from(tbody.querySelectorAll("tr"));
 
-        <!-- Submit Button Centered -->
-        <div class="flex justify-center">
-            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-                Optimize
-            </button>
-        </div>
-    </form>
+      // Validate first (required) row
+      const firstRow = rows[0];
+      if (!isRowAllFilled(firstRow)) {
+        e.preventDefault();
+        alert("Please complete all fields in the first row.");
+        return;
+      }
 
-    <!-- Auto-add Row Script -->
-    <script>
-        const tbody = document.getElementById("ductStandardBody");
+      // Prepare list of filled rows (first row is filled by validation above)
+      const keptRows = [firstRow];
 
-        tbody.addEventListener("input", () => {
-            const rows = tbody.querySelectorAll("tr");
-            const lastRow = rows[rows.length - 1];
-            const diameter = lastRow.querySelector(`input[name^='ductDiameters']`);
-            // const cost = lastRow.querySelector(`input[name^='ductCosts']`);
+      // For subsequent rows: keep fully filled; remove fully empty; block partial
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (isRowAllEmpty(row)) {
+          row.remove(); // prevent empty values from submitting
+        } else if (!isRowAllFilled(row)) {
+          e.preventDefault();
+          alert(`Please complete all fields in row ${i + 1} or leave it entirely blank.`);
+          return;
+        } else {
+          keptRows.push(row);
+        }
+      }
 
-            if (diameter.value) {
-                const index = rows.length;
-                const newRow = document.createElement("tr");
-
-                newRow.innerHTML = `
-                    <td class="border px-2 py-1">${index + 1}</td>
-                    <td class="border px-2 py-1"><input type="number" step="any" name="ductDiameters[${index}]" class="w-full border p-1 rounded"></td>
-                    <!-- <td class="border px-2 py-1"><input type="number" step="any" name="ductCosts[${index}]" class="w-full border p-1 rounded"></td> -->
-                `;
-                tbody.appendChild(newRow);
-            }
+      // Re-index input names so indices are contiguous: [0], [1], [2], ...
+      keptRows.forEach((row, newIndex) => {
+        rowInputs(row).forEach(input => {
+          const base = input.name.replace(/\[\d+\]$/, ""); // remove [n]
+          input.name = `${base}[${newIndex}]`;
         });
-    </script>
+        // Also fix the display number in the first cell
+        const numberCell = row.querySelector("td:first-child");
+        if (numberCell) numberCell.textContent = String(newIndex + 1);
+      });
+    });
+  </script>
 
 </section>
 </html>

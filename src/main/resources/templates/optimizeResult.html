@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent})}">
+
+<section id="content" class="w-full flex flex-col items-center gap-6">
+
+    <h2 class="text-2xl font-bold mt-4">Optimization Results</h2>
+
+    <!-- Duct Specifications Table -->
+    <div class="w-full max-w-5xl bg-white rounded-lg shadow p-4">
+        <h3 class="text-lg font-semibold mb-3">Duct Specifications</h3>
+        <table class="w-full border border-gray-300 text-sm text-center">
+            <thead class="bg-gray-100 sticky top-0">
+                <tr>
+                    <th class="border px-2 py-1">Color</th>
+                    <th class="border px-2 py-1">Duct #</th>
+                    <th class="border px-2 py-1">Diameter (m)</th>
+                    <th class="border px-2 py-1">Friction Factor</th>
+                    <th class="border px-2 py-1">Segment Length (m)</th>
+                    <th class="border px-2 py-1">Segment Count</th>
+                    <th class="border px-2 py-1">Leakage Resistance (/100m)</th>
+                </tr>
+            </thead>
+            <tbody id="ductSpecsBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Charts -->
+    <div class="w-full max-w-5xl grid grid-cols-1 gap-6">
+        <div class="bg-white p-4 rounded-lg shadow">
+            <canvas id="concentrationChart" class="w-full h-80"></canvas>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <canvas id="airFlowEntryChart" class="w-full h-80"></canvas>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <canvas id="airFlowFaceChart" class="w-full h-80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Tables -->
+    <div class="w-full max-w-5xl space-y-4 mt-6" id="resultTables"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const concentrations = /*[[${result.concentrations}]]*/ [];
+        const airFlowRateAtEntry = /*[[${result.airFlowRateAtEntry}]]*/ [];
+        const airFlowRateAtFace = /*[[${result.airFlowRateAtFace}]]*/ [];
+        const ductSpecs = /*[[${result.ductSpecification}]]*/ [];
+
+        const maxFans = Math.max(...concentrations.map(list => list.length));
+        const fanLabels = Array.from({ length: maxFans }, (_, i) => i + 1);
+        const colors = concentrations.map((_, idx) => `hsl(${(idx * 60) % 360}, 70%, 50%)`);
+
+        // Fill Duct Specs Table
+        const ductBody = document.getElementById("ductSpecsBody");
+        ductSpecs.forEach((spec, idx) => {
+            const tooltipText = `
+Diameter: ${spec.ductDiameters} m
+Friction Factor: ${spec.frictionFactor}
+Segment Length: ${spec.segmentLength} m
+Segment Count: ${spec.segmentCount}
+Leakage Resistance: ${spec.leakageResistance} /100m
+            `.trim();
+            ductBody.innerHTML += `
+                <tr class="hover:bg-gray-50">
+                    <td class="border px-2 py-1">
+                        <span title="${tooltipText}" style="display:inline-block;width:16px;height:16px;background:${colors[idx]};border-radius:3px;cursor:pointer;"></span>
+                    </td>
+                    <td class="border px-2 py-1">${idx + 1}</td>
+                    <td class="border px-2 py-1">${spec.ductDiameters}</td>
+                    <td class="border px-2 py-1">${spec.frictionFactor}</td>
+                    <td class="border px-2 py-1">${spec.segmentLength}</td>
+                    <td class="border px-2 py-1">${spec.segmentCount}</td>
+                    <td class="border px-2 py-1">${spec.leakageResistance}</td>
+                </tr>
+            `;
+        });
+
+        function createDatasets(dataArray, labelPrefix) {
+            return dataArray.map((list, idx) => ({
+                label: `${labelPrefix} - Duct ${idx + 1}`,
+                data: list,
+                borderColor: colors[idx],
+                backgroundColor: colors[idx],
+                fill: false,
+                tension: 0.1
+            }));
+        }
+
+        // Common legend click handler for all charts
+        function legendClickHandler(e, legendItem, chart) {
+            const ductIndex = legendItem.datasetIndex;
+            chart.toggleDataVisibility(ductIndex);
+            chart.update();
+
+            const accordionBtn = document.querySelector(`#ductTable-${ductIndex} .accordion-btn`);
+            const accordionBody = document.querySelector(`#ductTable-${ductIndex} .accordion-body`);
+            if (accordionBtn && accordionBody) {
+                accordionBody.classList.remove('hidden');
+                accordionBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Create charts with interactive legend
+        new Chart(document.getElementById('concentrationChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: fanLabels, datasets: createDatasets(concentrations, 'Concentration') },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: { display: true, text: 'Dust Concentration vs. Number of Fans' },
+                    legend: {
+                        position: 'bottom',
+                        onClick: legendClickHandler
+                    }
+                },
+                scales: { x: { title: { display: true, text: 'Number of Fans' } }, y: { title: { display: true, text: 'Concentration (mg/m³)' } } }
+            }
+        });
+
+        new Chart(document.getElementById('airFlowEntryChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: fanLabels, datasets: createDatasets(airFlowRateAtEntry, 'Air Flow Entry') },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: { display: true, text: 'Air Flow Rate at Entry vs. Number of Fans' },
+                    legend: {
+                        position: 'bottom',
+                        onClick: legendClickHandler
+                    }
+                },
+                scales: { x: { title: { display: true, text: 'Number of Fans' } }, y: { title: { display: true, text: 'Air Flow Rate (m³/s)' } } }
+            }
+        });
+
+        new Chart(document.getElementById('airFlowFaceChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: fanLabels, datasets: createDatasets(airFlowRateAtFace, 'Air Flow Face') },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: { display: true, text: 'Air Flow Rate at Face vs. Number of Fans' },
+                    legend: {
+                        position: 'bottom',
+                        onClick: legendClickHandler
+                    }
+                },
+                scales: { x: { title: { display: true, text: 'Number of Fans' } }, y: { title: { display: true, text: 'Air Flow Rate (m³/s)' } } }
+            }
+        });
+
+        // Accordion tables
+        const tablesContainer = document.getElementById('resultTables');
+        concentrations.forEach((concList, idx) => {
+            let rowsHTML = '';
+            concList.forEach((conc, fanIdx) => {
+                const entry = airFlowRateAtEntry[idx]?.[fanIdx] ?? '';
+                const face = airFlowRateAtFace[idx]?.[fanIdx] ?? '';
+                rowsHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="border px-2 py-1">${fanIdx + 1}</td>
+                        <td class="border px-2 py-1">${Number(conc).toFixed(2)}</td>
+                        <td class="border px-2 py-1">${Number(entry).toFixed(2)}</td>
+                        <td class="border px-2 py-1">${Number(face).toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            tablesContainer.innerHTML += `
+                <div id="ductTable-${idx}" class="bg-white rounded shadow">
+                    <button class="accordion-btn w-full text-left px-4 py-2 font-semibold bg-gray-100 hover:bg-gray-200">
+                        Duct ${idx + 1} Results
+                    </button>
+                    <div class="accordion-body p-4 hidden">
+                        <table class="w-full border border-gray-300 text-sm text-center">
+                            <thead class="bg-gray-50 sticky top-0">
+                                <tr>
+                                    <th class="border px-2 py-1">Fan No.</th>
+                                    <th class="border px-2 py-1">Concentration (mg/m³)</th>
+                                    <th class="border px-2 py-1">Air Flow Rate at Entry (m³/s)</th>
+                                    <th class="border px-2 py-1">Air Flow Rate at Face (m³/s)</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rowsHTML}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Toggle accordion manually
+        document.querySelectorAll('.accordion-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.nextElementSibling.classList.toggle('hidden');
+            });
+        });
+        /*]]>*/
+    </script>
+
+</section>
+</html>

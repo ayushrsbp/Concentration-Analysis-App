@@ -1,25 +1,17 @@
-<!-- <nav data-th-fragment="navbar" class="bg-blue-600 text-white px-4 py-3 flex justify-between items-center shadow">
-    <button th:onclick="|location.href='@{/home}'|" class="font-semibold hover:underline">Home</button>
-    <h1 class="text-xl font-bold">Washibility Characteristics</h1>
-    <button onclick="location.reload()" class="font-semibold hover:underline">Refresh</button>
-</nav> -->
-<!-- Make sure Heroicons are available in your setup. If not, I can guide you to include them. -->
-
-<nav data-th-fragment="navbar" class="bg-blue-600 text-white px-4 py-3 flex justify-between items-center shadow fixed top-0 w-full z-50">
-    <button th:onclick="|location.href='@{/}'|" class="hover:text-gray-200 flex items-center">
-        <!-- Home Icon -->
+<nav data-th-fragment="navbar" class="bg-blue-700 text-white px-6 py-3 flex justify-between items-center shadow-md fixed top-0 w-full z-50">
+    <button th:onclick="|location.href='@{/}'|" class="p-2 rounded-full hover:bg-blue-600 transition-colors duration-200 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 22V12h6v10" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
         </svg>
+        <span class="font-medium">Home</span>
     </button>
 
-    <h1 class="text-xl font-bold">Mine Ventilation Solution Application</h1>
+    <h1 class="text-xl font-semibold tracking-wide">Mine Ventilation Solution</h1>
 
-    <button onclick="location.reload()" class="hover:text-gray-200 flex items-center">
-        <!-- Refresh Icon -->
+    <button onclick="location.reload()" class="p-2 rounded-full hover:bg-blue-600 transition-colors duration-200 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M5.419 9A7.97 7.97 0 0 1 12 4c3.092 0 5.794 1.757 7.07 4.362M18.582 15A7.97 7.97 0 0 1 12 20c-3.092 0-5.794-1.757-7.07-4.362" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.418 0h.581M4 4a8 8 0 0113.857 5.09M20 20v-5h-.581M4 20a8 8 0 0113.857-5.09" />
         </svg>
+        <span class="font-medium">Refresh</span>
     </button>
 </nav>

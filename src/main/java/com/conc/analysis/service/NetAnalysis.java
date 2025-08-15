@@ -7,11 +7,13 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.conc.analysis.form.NetForm;
 import com.conc.analysis.results.NetResult;
 
+@Scope("prototype")
 @Service
 public class NetAnalysis {
 

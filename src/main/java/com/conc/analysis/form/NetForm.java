@@ -1,7 +1,6 @@
 package com.conc.analysis.form;
 
-import java.util.*;
-
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import lombok.AllArgsConstructor;
@@ -11,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Scope("prototype")
 @Component
 public class NetForm {
     private int nff;

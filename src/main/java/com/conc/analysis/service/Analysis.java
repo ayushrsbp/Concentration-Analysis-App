@@ -3,19 +3,18 @@ package com.conc.analysis.service;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.conc.analysis.form.InputData;
 import com.conc.analysis.results.Result;
 
+@Scope("prototype")
 @Service
 public class Analysis {
 
     @Autowired
     private Result result;
-
-    @Autowired
-    private ExcelService excelService;
 
     public Result analyzeConcentration(InputData inputData) throws IOException {
         // Process the input data
