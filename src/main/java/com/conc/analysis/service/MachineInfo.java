@@ -1,18 +1,15 @@
 package com.conc.analysis.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-<<<<<<< HEAD
+
 import org.springframework.context.annotation.Scope;
-=======
->>>>>>> b48738a04a5fc2e9630ee9b1440bd0a8aef826b7
+
 import org.springframework.stereotype.Service;
 
 import com.conc.analysis.results.Info;
 
-<<<<<<< HEAD
+
 @Scope("prototype")
-=======
->>>>>>> b48738a04a5fc2e9630ee9b1440bd0a8aef826b7
 @Service
 public class MachineInfo {
 

@@ -47,11 +47,13 @@ public class Optimize {
         List<Double>[] concentrations = new ArrayList[noOfDuctType];
         List<Double>[] airFlowRateAtFace = new ArrayList[noOfDuctType];
         List<Double>[] airFlowRateAtEntry = new ArrayList[noOfDuctType];
+        List<Result>[] allResults = new ArrayList[noOfDuctType];
         for(int i = 0 ; i< noOfDuctType; i++) {
-            int maxFan =(segmentCount[i]*segmentLength[i])/200;
+            int maxFan =(segmentCount[i]*segmentLength[i])/((100/segmentLength[i])*segmentLength[i]);
             concentrations[i] = new ArrayList<>();
             airFlowRateAtFace[i] = new ArrayList<>();
             airFlowRateAtEntry[i] = new ArrayList<>();
+            allResults[i] = new ArrayList<>();
             for(int fan = 1; fan <= maxFan; fan++) {
                 int nff = 0;
                 int nfb = fan;
@@ -62,7 +64,7 @@ public class Optimize {
                 double f = frictionFactor[i];
                 double s = Math.PI*ductDiameters[i]*segmentLength[i];
                 double area = (Math.PI * ductDiameters[i] * ductDiameters[i])/4;
-                double ductSegmentResistance = (f * s)/Math.pow(area, 3);
+                double ductSegmentResistance = Math.round((f * s *1000)/Math.pow(area, 3))/1000.0;
                 // double leakageResistance;
                 int[] fanPos = new int[fan];
                 fanPos[0] = 1;
@@ -87,6 +89,7 @@ public class Optimize {
 
                 Result result = analysis2.analyze(inputData2);
 
+                allResults[i].add(result);
                 concentrations[i].add(result.getConcentrationAtFace());
                 airFlowRateAtEntry[i].add(result.getEnterAirFlowRate());
                 double[] returnFlowRate = result.getReturnFlowRate();
@@ -103,6 +106,11 @@ public class Optimize {
         optimizeResult.setAirFlowRateAtFace(airFlowRateAtFace);
         optimizeResult.setAirFlowRateAtEntry(airFlowRateAtEntry);
         optimizeResult.setDuctSpecification(ductData);
+        optimizeResult.setAllResults(allResults);
+        optimizeResult.setMaxConc(inputData.getMaxConc());
+        optimizeResult.setEmissionRate(emissionRate);
+        optimizeResult.setA(a);
+        optimizeResult.setB(b);
 
         return optimizeResult;
     }

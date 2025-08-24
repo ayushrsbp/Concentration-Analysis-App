@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div data-th-fragment="calculators">
+
+<script>
+/* -------- dropdown: close on outside click -------- */
+(function () {
+    const menu = document.getElementById('calcMenu');
+    document.addEventListener('click', (e) => {
+        if (menu && !menu.contains(e.target)) menu.open = false;
+    });
+})();
+
+/* -------- floating calculators -------- */
+function openCalculator(type) {
+    if (document.getElementById('calc-' + type)) {
+        bringToFront(document.getElementById('calc-' + type));
+        return;
+    }
+
+    const calcButton = document.getElementById('calcMenu');
+    if (!calcButton) return; // Failsafe
+    const rect = calcButton.getBoundingClientRect();
+
+    const box = document.createElement('div');
+    box.id = 'calc-' + type;
+    box.className = 'fixed bg-white text-gray-800 border border-gray-200 rounded-xl shadow-2xl overflow-hidden select-none';
+    
+    // Set initial size and position
+    box.style.width = '340px'; // Slightly wider for better spacing
+    box.style.height = 'auto'; // Auto height to fit content
+    box.style.top = (rect.bottom + 12) + 'px'; // Position below the navbar button
+    box.style.left = (rect.right - 340) + 'px'; // Positioned to the left of the button
+    box.style.zIndex = getNextZ();
+
+    box.innerHTML = `
+      <div class="h-10 bg-blue-700 text-white flex items-center justify-between px-4 cursor-move shadow-md">
+        <span class="font-semibold text-sm flex items-center gap-2">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          ${getCalcTitle(type)}
+        </span>
+        <div class="flex items-center gap-2">
+          <button type="button" class="text-white/80 hover:text-white" data-role="minimize">—</button>
+          <button type="button" class="text-white/80 hover:text-white" data-role="close">✖</button>
+        </div>
+      </div>
+      <div class="p-4 h-full overflow-auto bg-gray-50">
+        ${getCalculatorContent(type)}
+      </div>
+    `;
+
+    document.body.appendChild(box);
+    makeDraggable(box);
+
+    const header = box.firstElementChild;
+    header.addEventListener('mousedown', () => bringToFront(box));
+    header.querySelector('[data-role="close"]').addEventListener('click', () => box.remove());
+    header.querySelector('[data-role="minimize"]').addEventListener('click', () => {
+        const body = box.children[1];
+        body.style.display = (body.style.display === 'none') ? 'block' : 'none';
+        box.style.height = 'auto'; // Recalculate height
+    });
+}
+
+function getCalcTitle(type) {
+    if (type === 'resistance') return 'Resistance Calculator';
+    return type;
+}
+
+function getCalculatorContent(type) {
+    if (type === 'resistance') {
+        const uid = 'res-' + Math.random().toString(36).slice(2, 8);
+        return `
+            <div class="space-y-4">
+                <div>
+                    <label for="${uid}-k" class="block text-sm font-medium text-gray-600 mb-1">Friction Factor (Ns²/m<sup>4</sup>)</label>
+                    <input id="${uid}-k" type="number" step="any" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 0.002">
+                </div>
+                <div>
+                    <label for="${uid}-d" class="block text-sm font-medium text-gray-600 mb-1">Duct Diameter (m)</label>
+                    <input id="${uid}-d" type="number" step="any" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 0.6">
+                </div>
+                <div>
+                    <label for="${uid}-l" class="block text-sm font-medium text-gray-600 mb-1">Duct Length (m)</label>
+                    <input id="${uid}-l" type="number" step="any" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 100">
+                </div>
+            </div>
+            <div class="mt-5 border-t pt-4 space-y-3">
+                 <button type="button" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105"
+                        onclick="(function(){
+                            const k = parseFloat(document.getElementById('${uid}-k').value)||0;
+                            const d = parseFloat(document.getElementById('${uid}-d').value)||0;
+                            const l = parseFloat(document.getElementById('${uid}-l').value)||0;
+                            const resultEl = document.getElementById('${uid}-result');
+                            if (d === 0) {
+                                resultEl.textContent = '∞';
+                                return;
+                            }
+                            const perimeter = Math.PI * d;
+                            const area = Math.PI * d * d / 4;
+                            const resistance = (k * l * perimeter) / Math.pow(area, 3);
+                            resultEl.textContent = resistance.toFixed(4) + ' Ns²/m⁸';
+                        })()">Calculate Resistance</button>
+                <div class="bg-gray-200 p-3 rounded-lg text-center">
+                    <span class="font-medium text-gray-600">Resistance (R) = </span>
+                    <span id="${uid}-result" class="font-bold text-lg text-gray-800">0.0000 Ns²/m⁸</span>
+                </div>
+            </div>
+        `;
+    }
+    return `<p class="text-sm text-gray-600">Calculator content here…</p>`;
+}
+
+/* ---- helpers ---- */
+let __zTop = 3000;
+function getNextZ(){ return ++__zTop; }
+function bringToFront(el){ el.style.zIndex = getNextZ(); }
+
+function makeDraggable(box) {
+    const header = box.firstElementChild;
+    let dragging = false, startX=0, startY=0, startLeft=0, startTop=0;
+
+    header.addEventListener('mousedown', (e) => {
+        if (e.target.closest('button')) return;
+        dragging = true;
+        bringToFront(box);
+        startX = e.clientX; startY = e.clientY;
+        const r = box.getBoundingClientRect();
+        startLeft = r.left; startTop = r.top;
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        const nx = startLeft + (e.clientX - startX);
+        const ny = startTop + (e.clientY - startY);
+        box.style.left = nx + 'px';
+        box.style.top  = ny + 'px';
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (!dragging) return;
+        dragging = false;
+        document.body.style.userSelect = '';
+    });
+}
+</script>
+
+</div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" 
-      th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent})}">
+      th:replace="~{base :: parent(~{::#content}, ~{::#leftContent}, ~{::#rightContent}, 'l', 'r')}">
 
 <section id="content" class="w-full flex flex-col items-center gap-6">
 
@@ -12,6 +12,11 @@
     <div>
       <label for="emissionRate" class="block font-medium">Emission Rate (mg/sec):</label>
       <input type="number" step="any" name="emissionRate" id="emissionRate" class="w-full border p-2 rounded" required>
+    </div>
+
+    <div>
+      <label for="maxConc" class="block font-medium">Maximum Concentration Limit (mg/m³):</label>
+      <input type="number" step="any" name="maxConc" id="maxConc" class="w-full border p-2 rounded">
     </div>
 
     <!-- Fan Characteristics -->
@@ -65,9 +70,9 @@
           </tr>
         </tbody>
       </table>
-      <p class="text-xs text-gray-500 mt-1">
+      <!-- <p class="text-xs text-gray-500 mt-1">
         Tip: As soon as you complete all fields in the last row, a new optional row will appear automatically.
-      </p>
+      </p> -->
     </div>
 
     <!-- Submit Button -->
@@ -82,6 +87,7 @@
   <script>
     const tbody = document.getElementById("ductStandardBody");
     const form  = document.getElementById("optimizeForm");
+    const maxConcInput = document.getElementById("maxConc");
 
     function createRow(index) {
       const tr = document.createElement("tr");
@@ -121,6 +127,11 @@
     // On submit: validate, remove empty optional rows, and re-index names
     form.addEventListener("submit", function (e) {
       const rows = Array.from(tbody.querySelectorAll("tr"));
+
+      // if maxConc empty → send Infinity
+      if (!maxConcInput.value.trim()) {
+        maxConcInput.value = Number.POSITIVE_INFINITY;
+      }
 
       // Validate first (required) row
       const firstRow = rows[0];

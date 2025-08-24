@@ -13,18 +13,21 @@ import com.conc.analysis.form.InputData2;
 import com.conc.analysis.form.InputData3;
 import com.conc.analysis.form.NetForm;
 import com.conc.analysis.results.NetResult;
-import com.conc.analysis.results.Result;
 import com.conc.analysis.results.OptimizeResult;
+import com.conc.analysis.results.Result;
 import com.conc.analysis.service.Analysis;
 import com.conc.analysis.service.Analysis2;
-import com.conc.analysis.service.NetAnalysis;
+import com.conc.analysis.service.NetSolver;
 import com.conc.analysis.service.Optimize;
 
 @Controller
 public class FormController {
 
+    // @Autowired
+    // private NetAnalysis networkAnalysis;
+
     @Autowired
-    private NetAnalysis networkAnalysis;
+    private NetSolver netSolver;
 
     @Autowired
     private Analysis analysis;
@@ -37,7 +40,7 @@ public class FormController {
 
     @PostMapping("/netAnalysis")
     public String netAnalysis(NetForm input, Model model) throws IOException {
-        NetResult result = networkAnalysis.solve(input);
+        NetResult result = netSolver.solve(input);
         model.addAttribute("result", result);
         return "netResult";
         // This method can be used to handle net analysis if needed
@@ -61,6 +64,9 @@ public class FormController {
 
     @PostMapping("/optimize")
     public String problem2(@ModelAttribute InputData3 inputData, Model model) throws IOException {
+        if(inputData.getMaxConc() == null) {
+            inputData.setMaxConc(Double.MAX_VALUE);
+        }
         OptimizeResult result = optimize.optimize(inputData);
         model.addAttribute("result", result);
         return "optimizeResult";

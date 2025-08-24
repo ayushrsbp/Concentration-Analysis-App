@@ -28,6 +28,7 @@
 </head>
 
 <body>
+
 <section id="content" class="w-full flex flex-col items-center gap-8">
 
     <div class="text-center">
@@ -58,25 +59,31 @@
     <script th:inline="javascript">
     /*<![CDATA[*/
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Data from backend ---
-        const concentrations = /*[[${result.concentrations}]]*/ [];
-        const airFlowRateAtEntry = /*[[${result.airFlowRateAtEntry}]]*/ [];
-        const airFlowRateAtFace = /*[[${result.airFlowRateAtFace}]]*/ [];
-        const ductSpecs = /*[[${result.ductSpecification}]]*/ [];
-        const allResults = /*[[${result.allResults}]]*/ [];
+        // --- 1. Data Initialization ---
+        const concentrationsData = /*[[${result.concentrations}]]*/ null;
+        const airFlowRateAtEntryData = /*[[${result.airFlowRateAtEntry}]]*/ null;
+        const airFlowRateAtFaceData = /*[[${result.airFlowRateAtFace}]]*/ null;
+        const ductSpecsData = /*[[${result.ductSpecification}]]*/ null;
+        const allResultsData = /*[[${result.allResults}]]*/ null;
         const maxConc = /*[[${result.maxConc}]]*/ null;
 
-        if (!concentrations || concentrations.length === 0) {
-            document.getElementById('content').innerHTML +=
-              '<p class="text-red-500 font-semibold">No optimization results to display.</p>';
+        const concentrations = concentrationsData || [];
+        const airFlowRateAtEntry = airFlowRateAtEntryData || [];
+        const airFlowRateAtFace = airFlowRateAtFaceData || [];
+        const ductSpecs = ductSpecsData || [];
+        const allResults = allResultsData || [];
+
+        if (concentrations.length === 0) {
+            const container = document.getElementById('content');
+            if(container) container.innerHTML += '<p class="text-red-500 font-semibold">No optimization results to display.</p>';
             return;
         }
 
-        const maxFans = Math.max(...concentrations.map(list => list.length));
+        const maxFans = Math.max(0, ...concentrations.map(list => list ? list.length : 0));
         const fanLabels = Array.from({ length: maxFans }, (_, i) => i + 1);
-        const colors = concentrations.map((_, idx) => `hsl(${(idx * 60 + 10) % 360},75%,55%)`);
+        const colors = concentrations.map((_, idx) => `hsl(${(idx * 60 + 10) % 360}, 75%, 55%)`);
 
-        // --- Accordions ---
+        // --- 2. Render Functions ---
         function renderResultAccordions() {
             const container = document.getElementById('resultTables');
             if (!container) return;
@@ -137,66 +144,53 @@
             });
         }
 
-        // --- Legend click handler (open accordion) ---
-        function legendClickHandler(e, legendItem, chart) {
-            const idx = legendItem.datasetIndex;
-            chart.toggleDataVisibility(idx);
-            chart.update();
-            const accordion = document.getElementById(`ductTable-${idx}`);
-            if (accordion) {
-                accordion.querySelector('.accordion-body').classList.add('open');
-                accordion.querySelector('.accordion-btn').classList.add('open');
-                accordion.scrollIntoView({ behavior:'smooth', block:'center' });
-            }
+        function initializeCharts() {
+            const createGradient = (ctx, color) => {
+                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, `${color}40`);
+                gradient.addColorStop(1, `${color}00`);
+                return gradient;
+            };
+            const createDatasets = (dataArray, labelPrefix) => {
+                return (dataArray || []).map((list, idx) => ({
+                    label: `${labelPrefix} #${idx + 1}`, data: list, borderColor: colors[idx],
+                    backgroundColor: (context) => createGradient(context.chart.ctx, colors[idx]),
+                    pointBackgroundColor: colors[idx], pointRadius: 4, pointHoverRadius: 7, fill: true, tension: 0.3
+                }));
+            };
+            const legendClickHandler = (e, legendItem, chart) => {
+                const idx = legendItem.datasetIndex;
+                chart.toggleDataVisibility(idx);
+                chart.update();
+                const accordion = document.getElementById(`ductTable-${idx}`);
+                if (accordion) {
+                    accordion.querySelector('.accordion-body').classList.add('open');
+                    accordion.querySelector('.accordion-btn').classList.add('open');
+                    accordion.scrollIntoView({ behavior:'smooth', block:'center' });
+                }
+            };
+            const baseChartOptions = {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', onClick: legendClickHandler } },
+                scales: { 
+                    x: { title: { display: true, text: 'Number of Fans', font: { size: 14 } }, grid: { display: false } }, 
+                    y: { title: { display: true, font: { size: 14 } }, grid: { color: '#e5e7eb' } }
+                }
+            };
+            new Chart(document.getElementById('concentrationChart'), {
+                type: 'line', data: { labels: fanLabels, datasets: createDatasets(concentrations, 'Conc.') },
+                options: { ...baseChartOptions, plugins: { ...baseChartOptions.plugins, title: { display: true, text: 'Dust Concentration vs. Number of Fans', font: { size: 18 } }, annotation: { annotations: { maxLine: { type: 'line', yMin: maxConc, yMax: maxConc, borderColor: 'rgb(239, 68, 68)', borderWidth: 2, borderDash: [6, 6], label: { content: 'Max Allowed', enabled: true, position: 'end', backgroundColor: 'rgba(239, 68, 68, 0.8)' } } } } }, scales: { ...baseChartOptions.scales, y: { ...baseChartOptions.scales.y, title: { ...baseChartOptions.scales.y.title, text: 'Concentration (mg/m³)' } } } }
+            });
+            new Chart(document.getElementById('airFlowEntryChart'), {
+                type: 'line', data: { labels: fanLabels, datasets: createDatasets(airFlowRateAtEntry, 'Flow Entry') },
+                options: { ...baseChartOptions, plugins: { ...baseChartOptions.plugins, title: { display: true, text: 'Air Flow at Entry', font: { size: 18 } } }, scales: { ...baseChartOptions.scales, y: { ...baseChartOptions.scales.y, title: { ...baseChartOptions.scales.y.title, text: 'Air Flow Rate (m³/s)' } } } }
+            });
+            new Chart(document.getElementById('airFlowFaceChart'), {
+                type: 'line', data: { labels: fanLabels, datasets: createDatasets(airFlowRateAtFace, 'Flow Face') },
+                options: { ...baseChartOptions, plugins: { ...baseChartOptions.plugins, title: { display: true, text: 'Air Flow at Face', font: { size: 18 } } }, scales: { ...baseChartOptions.scales, y: { ...baseChartOptions.scales.y, title: { ...baseChartOptions.scales.y.title, text: 'Air Flow Rate (m³/s)' } } } }
+            });
         }
-
-        // --- Charts ---
-        // function makeDatasets(data, label) {
-        //     return data.map((list, idx)=>({
-        //         label: `${label} - Duct ${idx+1}`,
-        //         data: list,
-        //         borderColor: colors[idx],
-        //         backgroundColor: colors[idx],
-        //         fill:false,
-        //         tension:0.2
-        //     }));
-        // }
-        function createDatasets(dataArray, labelPrefix, filterMax = false) {
-            return dataArray.map((list, idx) => ({
-                label: `${labelPrefix} - Duct ${idx + 1}`,
-                data: list.map(v => (filterMax && maxConc !== null && v > maxConc ? null : v)),
-                borderColor: colors[idx],
-                backgroundColor: colors[idx],
-                fill: false,
-                tension: 0.1
-            }));
-        }
-        new Chart(document.getElementById('concentrationChart'), {
-            type:'line',
-            data:{ labels: fanLabels, datasets: createDatasets(concentrations,'Conc', true) },
-            options:{
-                responsive:true,
-                plugins:{ legend:{ position:'bottom', onClick:legendClickHandler },
-                          title:{ display:true, text:'Dust Concentration vs Fans' } },
-                scales:{ x:{ title:{ display:true, text:'Number of Fans'} },
-                         y:{ title:{ display:true, text:'Concentration (mg/m³)'} } }
-            }
-        });
-        new Chart(document.getElementById('airFlowEntryChart'), {
-            type:'line',
-            data:{ labels: fanLabels, datasets: createDatasets(airFlowRateAtEntry,'Flow Entry') },
-            options:{ responsive:true, plugins:{ legend:{position:'bottom', onClick:legendClickHandler},
-                        title:{display:true,text:'Air Flow at Entry'} },
-                      scales:{ y:{ title:{ display:true, text:'Air Flow Rate (m³/s)' } } } }
-        });
-        new Chart(document.getElementById('airFlowFaceChart'), {
-            type:'line',
-            data:{ labels: fanLabels, datasets: createDatasets(airFlowRateAtFace,'Flow Face') },
-            options:{ responsive:true, plugins:{ legend:{position:'bottom', onClick:legendClickHandler},
-                        title:{display:true,text:'Air Flow at Face'} },
-                      scales:{ y:{ title:{ display:true, text:'Air Flow Rate (m³/s)' } } } }
-        });
-
+        
         // --- 3. Delegated Event Listener (fix) ---
         function setupEventListeners() {
             const container = document.getElementById('resultTables');
@@ -211,27 +205,25 @@
             });
         }
 
-        // --- Run ---
         // --- 4. Execute all functions in order ---
         renderResultAccordions();
+        initializeCharts();
         setupEventListeners(); // now works with delegation
     });
     /*]]>*/
     </script>
 </section>
 
-<!-- LEFT SIDEBAR CONTENT -->
 <div id="leftContent">
     <div class="bg-white p-4 rounded-xl shadow-md border space-y-3">
-        <h2 class="font-bold text-grey-500">Emission Rate:</h2>
-        <p><span th:text="${result.emissionRate} + ' mg/s'"></span></p>
-        <h2 class="font-bold text-grey-500">Fan Characteristic:</h2>
-        <!-- <p><strong>A:</strong> <span th:text="${result.a}"></span></p> -->
-        <p><span th:text="'P = ' + ${result.a} +'Q² + ' + ${result.b}"></span></p>
+        <h4 class="font-bold text-gray-700">Simulation Parameters</h4>
+        <div class="text-sm space-y-2 text-gray-600">
+            <p><strong>Emission Rate:</strong> <span th:text="${result.emissionRate} + ' mg/s'"></span></p>
+            <p><strong>Fan Curve:</strong> <span th:text="'P = ' + ${result.a} +'Q² + ' + ${result.b}"></span></p>
+        </div>
     </div>
 </div>
 
-<!-- RIGHT SIDEBAR CONTENT -->
 <div id="rightContent" class="space-y-3">
     <script th:inline="javascript">
     /*<![CDATA[*/
@@ -242,53 +234,33 @@
         const container = document.getElementById('rightContent');
 
         if (container && ductSpecs.length > 0) {
-            container.innerHTML = ''; // Clear any existing content
+            container.innerHTML = '';
             ductSpecs.forEach((spec, idx) => {
                 const card = document.createElement('div');
                 card.className = "duct-spec-card bg-white rounded-xl shadow-md border p-4 cursor-pointer hover:shadow-lg hover:border-blue-500 transition-all duration-300";
-                card.dataset.ductIndex = idx;
+                card.addEventListener('click', () => {
+                    const accordion = document.getElementById(`ductTable-${idx}`);
+                    if (accordion) {
+                        accordion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        accordion.style.transition = 'all 0.3s';
+                        accordion.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.5)';
+                        setTimeout(() => { accordion.style.boxShadow = ''; }, 1500);
+                    }
+                });
                 card.innerHTML = `
                     <div class="flex items-center justify-between mb-3">
                         <h4 class="font-bold text-gray-800">Duct #${idx + 1}</h4>
                         <span style="background-color:${colors[idx]};" class="w-5 h-5 rounded-md"></span>
                     </div>
                     <table class="w-full text-xs text-left">
-    <tbody>
-        <tr class="border-b border-gray-200">
-            <td class="py-1 pr-2 font-medium text-gray-500">Diameter</td>
-            <td class="py-1 text-gray-800 font-semibold">${spec.ductDiameters} m</td>
-        </tr>
-        <tr class="border-b border-gray-200">
-            <td class="py-1 pr-2 font-medium text-gray-500">Friction Factor</td>
-            <td class="py-1 text-gray-800 font-semibold">${spec.frictionFactor} Ns²/m⁸</td>
-        </tr>
-        <tr class="border-b border-gray-200">
-            <td class="py-1 pr-2 font-medium text-gray-500">Seg. Length</td>
-            <td class="py-1 text-gray-800 font-semibold">${spec.segmentLength} m</td>
-        </tr>
-        <tr class="border-b border-gray-200">
-            <td class="py-1 pr-2 font-medium text-gray-500">Seg. Count</td>
-            <td class="py-1 text-gray-800 font-semibold">${spec.segmentCount}</td>
-        </tr>
-        <tr>
-            <td class="py-1 pr-2 font-medium text-gray-500">Leakage Resistance</td>
-            <td class="py-1 text-gray-800 font-semibold">${spec.leakageResistance} Ns²/m⁸ (100 m)</td>
-        </tr>
-    </tbody>
-</table>`;
-                
-                card.addEventListener('click', () => {
-                    const accordion = document.getElementById(`ductTable-${idx}`);
-                    if (accordion) {
-                        accordion.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        // Highlight the accordion temporarily
-                        accordion.style.transition = 'all 0.3s';
-                        accordion.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.5)';
-                        setTimeout(() => {
-                           accordion.style.boxShadow = '';
-                        }, 1500);
-                    }
-                });
+                        <tbody>
+                            <tr class="border-b border-gray-200"><td class="py-1 pr-2 font-medium text-gray-500">Diameter</td><td class="py-1 text-gray-800 font-semibold">${spec.ductDiameters} m</td></tr>
+                            <tr class="border-b border-gray-200"><td class="py-1 pr-2 font-medium text-gray-500">Friction Factor</td><td class="py-1 text-gray-800 font-semibold">${spec.frictionFactor}</td></tr>
+                            <tr class="border-b border-gray-200"><td class="py-1 pr-2 font-medium text-gray-500">Seg. Length</td><td class="py-1 text-gray-800 font-semibold">${spec.segmentLength} m</td></tr>
+                            <tr class="border-b border-gray-200"><td class="py-1 pr-2 font-medium text-gray-500">Seg. Count</td><td class="py-1 text-gray-800 font-semibold">${spec.segmentCount}</td></tr>
+                            <tr><td class="py-1 pr-2 font-medium text-gray-500">Leakage Res.</td><td class="py-1 text-gray-800 font-semibold">${spec.leakageResistance} /100m</td></tr>
+                        </tbody>
+                    </table>`;
                 container.appendChild(card);
             });
         }

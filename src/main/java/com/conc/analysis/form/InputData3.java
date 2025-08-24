@@ -21,4 +21,5 @@ public class InputData3 {
     private int[] segmentLength;
     private int[] segmentCount;
     private double[] leakageResistance;
+    private Double maxConc;
 }

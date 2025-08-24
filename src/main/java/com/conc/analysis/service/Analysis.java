@@ -1,7 +1,5 @@
 package com.conc.analysis.service;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -13,12 +11,13 @@ import com.conc.analysis.results.Result;
 @Service
 public class Analysis {
 
-    @Autowired
+    // @Autowired
     private Result result;
 
-    public Result analyzeConcentration(InputData inputData) throws IOException {
+    public Result analyzeConcentration(InputData inputData) {
         // Process the input data
         // MultipartFile file = inputData.getFile();
+        result = new Result();
         result.setValid(true);
         Double entryFlowRate = inputData.getEnterAirFlowRate();
         Double emissionRate = inputData.getEmissionRate();
@@ -69,7 +68,6 @@ public class Analysis {
             distance[i] = i * segmentLength;
         }
         if(prevQinDuct <= 0.0) {
-            System.out.println("method called");
             result.setValid(false);
         }
         double concAtFace = concentrationInMine[n+1];
@@ -80,7 +78,11 @@ public class Analysis {
         returnFlowRate[n+1] = Math.round(prevQinMine * 10000) / 10000.0;
 
         distance[n+1] = (n+1) * segmentLength;
-
+        if(returnFlowRate[n+1] <= 0.0) {
+            returnFlowRate[n+1] = 0.0;
+            concAtFace = 0.0;
+            result.setValid(false);
+        }
         result.setConcInDuct(concentrationInDuct);
         result.setConcInMine(concentrationInMine);
         result.setConcentrationAtFace(concAtFace);

@@ -1,11 +1,11 @@
 package com.conc.analysis.results;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.context.annotation.Scope;
 
 @Data
 @AllArgsConstructor
@@ -20,5 +20,5 @@ public class NetResult {
     private double[] q;
     private double[] r;
     private double[] qMin;
-
+    private String message;
 }

@@ -25,7 +25,8 @@ public class Analysis2 {
     private Analysis analysis;
 
     @Autowired
-    private NetworkAnalysis netAnalysis;
+    private NetSolver netSolver;
+    // private NetworkAnalysis netAnalysis;
     // private NetAnalysis netAnalysis;
 
     @Autowired
@@ -39,7 +40,7 @@ public class Analysis2 {
 
         NetForm netForm = createInputFile.createInputFile(inputData);
 
-        NetResult netResult = netAnalysis.solve(netForm);
+        NetResult netResult = netSolver.solve(netForm);
 
         double[] q = netResult.getQ();
         int[] no = netResult.getNo();
